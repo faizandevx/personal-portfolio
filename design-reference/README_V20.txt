@@ -1,0 +1,1 @@
+V20 About page: selected Connected Engineering Workflow card. Open index.html then About. Theme toggle works through existing app.js. All other pages inherited from V19. Workflow has 4 stages and reduced-motion support.

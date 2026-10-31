@@ -1,0 +1,10 @@
+.next
+node_modules
+playwright-report
+test-results
+tests/**/*-snapshots
+package-lock.json
+next-env.d.ts
+AGENTS.md
+# The approved V21 stylesheet is kept byte-for-byte; never reformat it.
+src/styles/legacy

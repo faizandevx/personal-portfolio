@@ -1,0 +1,5 @@
+# Keep LF everywhere (matches Prettier) regardless of core.autocrlf.
+* text=auto eol=lf
+
+# The approved V21 reference is byte-for-byte read-only: never convert it.
+design-reference/** -text

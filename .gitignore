@@ -1,0 +1,21 @@
+# Root ignores. App-specific ignores (.next, test artefacts, next-env.d.ts)
+# live in web/.gitignore.
+
+# Dependencies
+node_modules/
+
+# Environment secrets (only the template is tracked)
+.env*
+!.env.example
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

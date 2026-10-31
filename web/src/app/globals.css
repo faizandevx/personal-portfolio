@@ -1,0 +1,38 @@
+/*
+ * Global stylesheet entry.
+ *
+ * Tailwind is imported WITHOUT Preflight: only the theme and utilities layers.
+ * Preflight would reset margins, headings, buttons and lists that the approved
+ * V21 stylesheet relies on.
+ *
+ * Phase 1 adds the approved stylesheet, copied verbatim and unlayered, AFTER
+ * these imports:
+ *   @import "../styles/legacy/styles.css";
+ * Unlayered rules always win over layered Tailwind utilities, so the original
+ * design keeps precedence.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/*
+ * Reference design tokens exposed to Tailwind for the later, gradual
+ * conversion. Values resolve to the CSS variables defined by the V21
+ * stylesheet (html[data-theme="dark|light"]), so both themes stay in sync.
+ */
+@theme inline {
+  --color-orange: var(--orange);
+  --color-orange2: var(--orange2);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-secondary: var(--secondary);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel2);
+  --color-border: var(--border);
+  --color-glass: var(--glass);
+  --color-chip: var(--chip);
+  --color-halo: var(--halo);
+  --radius-card: var(--radius);
+  --shadow-card: var(--shadow);
+}
