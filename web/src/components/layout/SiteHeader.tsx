@@ -1,5 +1,6 @@
 import type { HeaderVariant } from "@/context/MenuContext";
 import Brand from "./Brand";
+import CvTrigger from "./CvTrigger";
 import HamburgerButton from "./HamburgerButton";
 import HeaderShell from "./HeaderShell";
 import MobileDrawer from "./MobileDrawer";
@@ -16,8 +17,8 @@ type SiteHeaderProps = {
 // The single V21 navigation bar. Markup, classes and aria attributes match
 // design-reference/*.html exactly so the approved CSS applies unchanged.
 //
-// The theme toggle, hamburger/drawer and scroll behaviour are interactive;
-// the CV button gets its behaviour in a later Phase 1 step.
+// Interactive parts: CV button (opens the shared CV modal), theme toggle,
+// hamburger/drawer and scroll behaviour.
 export default function SiteHeader({ variant }: SiteHeaderProps) {
   return (
     <HeaderShell variant={variant}>
@@ -27,9 +28,9 @@ export default function SiteHeader({ variant }: SiteHeaderProps) {
           <NavItems />
         </nav>
         <div className="nav-ctas">
-          <a className="cv-btn cv-trigger" href="#cv-preview" aria-label="View and download CV">
+          <CvTrigger className="cv-btn cv-trigger" aria-label="View and download CV">
             ↓ CV
-          </a>
+          </CvTrigger>
           <ThemeToggle />
           <HamburgerButton variant={variant} />
         </div>

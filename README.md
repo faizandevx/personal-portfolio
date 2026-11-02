@@ -89,7 +89,7 @@ routes can be added later for the contact form and the AI assistant.
 | Phase | Scope                                                                        | Status                                     |
 | ----- | ---------------------------------------------------------------------------- | ------------------------------------------ |
 | 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                     |
-| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | In progress: Steps A–F done (see below)    |
+| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | Built (Steps A–H); awaiting final approval |
 | 2     | Home page                                                                    | Not started                                |
 | 3     | About page                                                                   | Not started                                |
 | 4     | Projects, project detail, Experience                                         | Not started                                |
@@ -111,9 +111,11 @@ verified unchanged against SHA-256 checksums.
 - D: theme toggle
 - E: mobile drawer
 - F: two-stage scroll navigation
+- G: footer (live year, back to top; LinkedIn non-clickable until its URL is confirmed)
+- H: CV modal (accessible dialog; states honestly that the CV is not available yet)
 
-Still to do: the footer and the CV modal. The home page has a clearly marked temporary
-scroll-test spacer, which is removed in Phase 2.
+All Phase 1 features are built and awaiting final approval. The home page has a clearly marked
+temporary scroll-test spacer, which is removed in Phase 2.
 
 ## Not yet functional (by design)
 

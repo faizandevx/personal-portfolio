@@ -1,6 +1,7 @@
 "use client";
 
 import { useMenu, type HeaderVariant } from "@/context/MenuContext";
+import CvTrigger from "./CvTrigger";
 import NavItems, { navItems } from "./NavItems";
 
 // The V21 mobile drawer. It stays in the page at all times; the approved CSS
@@ -15,14 +16,13 @@ export default function MobileDrawer({ variant }: { variant: HeaderVariant }) {
     >
       <NavItems onNavigate={closeMenu} staggered />
       {/* --link-index continues after the nav links, as in app.js. */}
-      <a
+      <CvTrigger
         className="cv-trigger"
-        href="#cv-preview"
         style={{ "--link-index": String(navItems.length) } as React.CSSProperties}
-        onClick={closeMenu}
+        onOpen={closeMenu}
       >
         ↓ Download CV
-      </a>
+      </CvTrigger>
     </nav>
   );
 }
