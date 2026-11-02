@@ -31,6 +31,10 @@ See `README.md` for commands and phase status.
 - In Phase 1 the approved `styles.css` is copied **intact, as one file, in its original source
   order** to `web/src/styles/legacy/styles.css`. It is imported after Tailwind and left
   **unlayered**, so it always wins over utilities. Prettier ignores that folder.
+- **Source of truth for byte-identity is the V21 ZIP** (`design-reference/Faizan_Ali_Portfolio_Multipage_V21.zip`).
+  Every extracted file in `design-reference/` and `web/src/styles/legacy/styles.css` must match it
+  exactly. The root `.prettierignore` stops editor format-on-save or "Format Document" from
+  touching `design-reference/` and `web/src/styles/legacy/`.
 - Do not split or rewrite the legacy CSS early. A later, gradual Tailwind conversion happens one
   component at a time, and only when the screenshot parity tests still pass.
 - Keep the reference DOM structure. Selectors depend on it: `.inside-hero:has(+ …)`,
@@ -47,6 +51,24 @@ and second-photo panel, the photo-upload controls, and "design preview" disclaim
 Approved UI that is kept: the CV button, the WhatsApp button, the scripted "Ask Faizan AI" card
 (labelled as scripted), the contact form, and the photo panel frame. Each one gets honest
 not-yet-available behaviour.
+
+## Approved design changes (apply only in the named phase)
+
+These are user-approved deviations from V21. Parity tests must mask them and list them as
+intentional differences.
+
+**Phase 2: Home page** (approved 2026-11-02; do NOT apply earlier)
+
+1. Remove the `01 /`, `02 /`, `03 /`, `04 /` numbering from the four homepage section labels
+   (eyebrows). They read ABOUT ME, SELECTED WORK, EXPERTISE and CONTACT.
+2. Make those four eyebrow labels consistently a little larger, about 15–16px (V21 uses 11px).
+   Keep every other eyebrow style (orange colour, uppercase, letter-spacing, weight). Do not resize
+   the main headings.
+3. Remove the "Tech visual / Second photo" toggle, the "PREVIEW THE LOOK" caption and the
+   second-photo panel from the homepage About section. Keep the approved Tech Visual (`tech-v16`)
+   unchanged.
+4. Housekeeping (not a design change): remove the TEMPORARY scroll-test spacer `<section>` in
+   `web/src/app/page.tsx` that was added in Phase 1 Step F.
 
 ## Git
 

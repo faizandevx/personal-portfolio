@@ -22,6 +22,7 @@ personal-portfolio/
 │  ├─ tests/e2e/       Playwright behaviour tests
 │  ├─ tests/visual/    Playwright screenshot parity tests vs design-reference/
 │  └─ .env.example     Reserved environment variables (none are used yet)
+├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
 ├─ .gitattributes      LF line endings; design-reference/ is never converted
 ├─ .gitignore
 ├─ README.md
@@ -88,7 +89,7 @@ routes can be added later for the contact form and the AI assistant.
 | Phase | Scope                                                                        | Status                                     |
 | ----- | ---------------------------------------------------------------------------- | ------------------------------------------ |
 | 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                     |
-| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | Not started                                |
+| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | In progress: Steps A–F done (see below)    |
 | 2     | Home page                                                                    | Not started                                |
 | 3     | About page                                                                   | Not started                                |
 | 4     | Projects, project detail, Experience                                         | Not started                                |
@@ -100,7 +101,19 @@ Each phase finishes with build, lint, typecheck and tests passing and a report, 
 
 **Phase 0 result:** build, lint, typecheck and format checks pass. The Playwright smoke tests
 (`tests/e2e/smoke.spec.ts`, 2 of 2) pass in the installed Google Chrome. `design-reference/` is
-verified unchanged against SHA-256 checksums. Phase 1 has not started and waits for approval.
+verified unchanged against SHA-256 checksums.
+
+**Phase 1 progress:**
+
+- A: repair (exact V21 stylesheet restored from the ZIP)
+- B: theme foundation
+- C: static header
+- D: theme toggle
+- E: mobile drawer
+- F: two-stage scroll navigation
+
+Still to do: the footer and the CV modal. The home page has a clearly marked temporary
+scroll-test spacer, which is removed in Phase 2.
 
 ## Not yet functional (by design)
 

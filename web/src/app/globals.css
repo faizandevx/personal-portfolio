@@ -15,6 +15,8 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Approved V21 portfolio stylesheet */
+@import "../styles/legacy/styles.css";
 /*
  * Reference design tokens exposed to Tailwind for the later, gradual
  * conversion. Values resolve to the CSS variables defined by the V21

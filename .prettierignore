@@ -1,0 +1,8 @@
+# Read by the VS Code Prettier extension (workspace root) and by Prettier
+# runs started from this folder. web/.prettierignore covers runs from web/.
+
+# Approved V21 design: read-only, must stay byte-identical to the V21 ZIP.
+design-reference/
+
+# Verbatim copy of the approved V21 stylesheet: never reformat.
+web/src/styles/legacy/
