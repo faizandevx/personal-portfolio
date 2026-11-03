@@ -13,7 +13,10 @@
     "reference": "serve ../design-reference -l 4100 --no-clipboard",
     "test:e2e": "playwright test --project=e2e",
     "test:visual": "playwright test --project=visual --pass-with-no-tests",
-    "test": "playwright test --pass-with-no-tests"
+    "test": "playwright test --pass-with-no-tests",
+    "test:regression": "node tests/regression/run.cjs",
+    "test:regression:list": "node tests/regression/run.cjs --list",
+    "test:regression:parallel": "node tests/regression/run.cjs --jobs 3"
   },
   "dependencies": {
     "next": "16.4.3",

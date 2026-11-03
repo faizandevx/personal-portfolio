@@ -68,3 +68,60 @@
     transition: none;
   }
 }
+
+/*
+ * Phase 6: light-theme text contrast (WCAG 2.1 AA, approved 2026-11-03).
+ * V21's orange #f97338 is 2.27-2.79:1 on the light backgrounds, below the 4.5:1
+ * needed for normal text and the 3:1 needed for large text. In the light theme
+ * only, orange TEXT uses a deeper orange with V21's exact hue and chroma (OKLCH
+ * h 42.3, C 0.179), only lower in lightness:
+ * - --orange #b84604 (4.75:1 or more on every light surface) for normal text;
+ * - --orange-large #e56122 (3.06:1 or more) for large headline accents.
+ * Decorative orange paint (dots, underlines, dividers, the avatar outline) keeps
+ * the original #f97338 by resetting the token on exactly those elements. The
+ * dark theme is unchanged.
+ */
+html[data-theme="light"] {
+  --orange: #b84604;
+  --orange-large: #e56122;
+  --orange-brand: #f97338;
+}
+html[data-theme="light"]
+  :is(
+    .hero-copy h1 .line-accent,
+    h2 .accent,
+    .tech-v16-heading span,
+    .footer-reference-brand span
+  ) {
+  color: var(--orange-large);
+}
+/* A plain list, not :is(): :is() cannot match pseudo-elements such as ::after. */
+html[data-theme="light"] .orange-dot,
+html[data-theme="light"] .avatar-circle svg,
+html[data-theme="light"] .timeline-item::before,
+html[data-theme="light"] .nav-links a::after,
+html[data-theme="light"] .mobile-drawer a::after,
+html[data-theme="light"] .nav-links .nav-label::after,
+html[data-theme="light"] .mobile-drawer .nav-label::after,
+html[data-theme="light"] .eyebrow-line,
+html[data-theme="light"] .mini-ai-footer-dot,
+html[data-theme="light"] .footer-nav a span::after,
+html[data-theme="light"] .country-indicator,
+html[data-theme="light"] .footer-reference-nav a span::after,
+html[data-theme="light"] .caption-dot,
+html[data-theme="light"] .small-live-dot,
+html[data-theme="light"] .window-chrome > span:first-child,
+html[data-theme="light"] .window-lines .orange-line,
+html[data-theme="light"] .tech-v16-live-dot,
+html[data-theme="light"] .about-v18-foot-divider,
+html[data-theme="light"] .about-v18-text-link span:first-child::after {
+  --orange: var(--orange-brand);
+}
+
+/*
+ * Phase 6: the footer timezone text. Its .87 opacity drops #626b7c to 3.72:1 on
+ * the light footer; at full opacity it is 4.75:1. Dark theme unchanged.
+ */
+html[data-theme="light"] .footer-timezone {
+  opacity: 1;
+}

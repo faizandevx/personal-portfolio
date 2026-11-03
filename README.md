@@ -19,8 +19,9 @@ personal-portfolio/
 │  ├─ src/content/     Typed site content (projects, experience, FAQ, skills, …)
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
-│  ├─ tests/e2e/       Playwright behaviour tests
-│  ├─ tests/visual/    Playwright screenshot parity tests vs design-reference/
+│  ├─ tests/e2e/       Playwright smoke tests
+│  ├─ tests/regression/  V21 parity + behaviour suites (615 checks; see its README.md)
+│  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Reserved environment variables (none are used yet)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
 ├─ .gitattributes      LF line endings; design-reference/ is never converted
@@ -57,6 +58,10 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
+npm run test:regression     # V21 parity + behaviour suites, 615 checks (about 22 min)
+npm run test:regression -- hero contact   # selected suites
+npm run test:regression:list              # suites and expected check counts
+npm run test:regression:parallel          # same checks, up to 3 suites at once (about 14 min)
 ```
 
 ## Tech stack
@@ -86,16 +91,16 @@ routes can be added later for the contact form and the AI assistant.
 
 ## Phase status
 
-| Phase | Scope                                                                        | Status                                     |
-| ----- | ---------------------------------------------------------------------------- | ------------------------------------------ |
-| 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                     |
-| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | ✅ Complete (approved)                     |
-| 2     | Home page                                                                    | Steps 2A–2D complete (approved); 2E next   |
-| 3     | About page                                                                   | Not started                                |
-| 4     | Projects, project detail, Experience                                         | Not started                                |
-| 5     | Contact + FAQ                                                                | Not started                                |
-| 6     | Hardening (performance, a11y, SEO, 404)                                      | Not started                                |
-| 7     | Replace demo functionality (CV, LinkedIn, WhatsApp, contact backend, photos) | Not started, each item approved separately |
+| Phase | Scope                                                                        | Status                                                |
+| ----- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                                |
+| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | ✅ Complete (approved)                                |
+| 2     | Home page                                                                    | Steps 2A–2D complete (approved); 2E next              |
+| 3     | About page                                                                   | Not started                                           |
+| 4     | Projects, project detail, Experience                                         | Not started                                           |
+| 5     | Contact + FAQ                                                                | Not started                                           |
+| 6     | Hardening (performance, a11y, SEO, 404)                                      | Homepage accessibility fixes built; awaiting approval |
+| 7     | Replace demo functionality (CV, LinkedIn, WhatsApp, contact backend, photos) | Not started, each item approved separately            |
 
 Each phase finishes with build, lint, typecheck and tests passing and a report, and the next phase waits for approval.
 
@@ -135,7 +140,13 @@ Phase 1 is complete and approved.
   - **Let's Chat** opens an accessible "WhatsApp connection coming soon" modal. No number is
     published and no chat is opened.
   - The CV and WhatsApp modals share one dialog hook (`src/hooks/useModalDialog.ts`).
-- 2E: homepage parity and behaviour tests in `tests/`, docs, Phase 2 report (next).
+- 2E: test consolidation and final homepage review.
+  - The 563 checks from Phases 1–2D are now tracked in `web/tests/regression/`, with no
+    machine-specific paths, a shared harness and the `npm run test:regression` runner.
+  - A new whole-homepage review suite adds 39 checks: structure, links, keyboard order and
+    focus, axe, animations, horizontal overflow and console errors. That makes 602 in total
+    (615 after Phase 6 added 13 accessibility checks).
+  - The runner also verifies `design-reference/` against the V21 checksums.
 
 ## Not yet functional (by design)
 
@@ -156,22 +167,20 @@ page is migrated:
 | `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan"                                       | Phase 5    |
 | `/faq`        | Header, footer                                                                                                 | Phase 5    |
 
-### Regression scripts not yet tracked in Git
+### Accessibility (Phase 6)
 
-The 563 Phase 2 regression checks, across 11 Playwright scripts, are **not yet in Git**. They
-compare every homepage section, the shell and the modals against V21. The repository's
-`web/tests/` currently holds only the e2e smoke tests.
+The axe findings from the Step 2E review were in the V21 design itself. They are fixed, and
+the regression suites now require **zero** axe violations (WCAG 2.1 A/AA) on the homepage in
+both themes:
 
-Until Phase 2 Step 2E moves the scripts into `web/tests/`, they are kept on the development
-machine in `.local/regression-2e/`. That folder is excluded locally through
-`.git/info/exclude` and is never pushed, and its own `README.md` explains how to run them.
+- **Light-theme contrast.** Orange text uses V21's hue and chroma at a lower lightness:
+  `#b84604` for normal text (4.75:1 or more) and `#e56122` for large headline accents
+  (3.06:1 or more). Decorative orange and the whole dark theme keep `#f97338`. The footer
+  timezone drops its `.87` opacity in the light theme (4.75:1).
+- **Pending footer LinkedIn icon:** now a labelled image (`role="img"`). It is not a link
+  or a focusable control until the URL is confirmed.
+- **Brand link:** its accessible name is "FA Faizan Ali, go to homepage", which starts with
+  the visible text (WCAG 2.5.3).
+- **Favicon:** `src/app/icon.svg`, the FA brand icon, so there is no more `/favicon.ico` 404.
 
-### Known minor issues
-
-- **No favicon.** The browser's automatic `/favicon.ico` request returns a 404 and logs one
-  console error. V21 has no favicon either. To fix later (Phase 6 hardening), without changing
-  the design.
-- **Low contrast on one label (light theme).** The orange 11px "LET'S CHAT" eyebrow in the
-  WhatsApp modal scores 2.78:1 on white (axe `color-contrast`; WCAG AA needs 4.5:1). This is
-  the V21 design, identical in `design-reference/`. Any colour change needs approval
-  (Phase 6).
+No known minor issues remain on the homepage.

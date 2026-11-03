@@ -49,8 +49,11 @@ export default function Footer() {
               <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.1c-3.09.67-3.74-1.32-3.74-1.32-.5-1.29-1.23-1.63-1.23-1.63-1.01-.7.07-.69.07-.69 1.11.08 1.7 1.14 1.7 1.14.99 1.7 2.6 1.21 3.23.93.1-.72.38-1.21.69-1.5-2.46-.28-5.05-1.23-5.05-5.48 0-1.21.43-2.2 1.14-2.98-.12-.28-.49-1.42.11-2.96 0 0 .93-.3 3.05 1.14A10.6 10.6 0 0 1 12 6.37c.95 0 1.9.13 2.78.38 2.12-1.44 3.05-1.14 3.05-1.14.6 1.54.23 2.68.11 2.96.71.78 1.14 1.77 1.14 2.98 0 4.26-2.59 5.2-5.06 5.48.39.34.73 1.01.73 2.04V22c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
             </svg>
           </a>
+          {/* Not a link until the LinkedIn URL is confirmed, so it is a labelled
+              graphic (role="img"), not a focusable control. */}
           <span
             className="footer-reference-icon footer-reference-icon-pending"
+            role="img"
             aria-label="LinkedIn profile link will be added after confirmation"
             title="LinkedIn profile link coming soon"
           >

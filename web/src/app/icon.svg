@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The header "FA" brand icon: same gradient (#ff9f60 to #f26d36), corner
+       radius (11/34) and white bold initials. Next.js serves it as the favicon. -->
+  <defs>
+    <linearGradient id="fa" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9f60" />
+      <stop offset="1" stop-color="#f26d36" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="10.35" fill="url(#fa)" />
+  <text
+    x="16"
+    y="16"
+    dy="0.35em"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif"
+    font-size="14"
+    font-weight="800"
+    letter-spacing="-0.3"
+  >FA</text>
+</svg>

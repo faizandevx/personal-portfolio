@@ -108,6 +108,24 @@ intentional differences.
      (scripted demo)".
    - Never add a WhatsApp number, a `wa.me` link or a live AI call without approval.
 
+**Phase 6: homepage accessibility** (approved 2026-11-03)
+
+9. WCAG 2.1 AA fixes. The approved V21 look is otherwise unchanged.
+   - **Light theme only:** orange text uses `--orange: #b84604` (normal text, 4.75:1 or more).
+     Large headline accents (`h1 .line-accent`, `h2 .accent`, `.tech-v16-heading span`,
+     `.footer-reference-brand span`) use `--orange-large: #e56122` (3.06:1 or more). Both keep
+     V21's OKLCH hue and chroma (h 42.3, C 0.179); only the lightness is lower.
+   - Decorative orange (dots, underlines, dividers, the avatar outline) is reset to
+     `--orange-brand: #f97338`. Buttons and the dark theme are unchanged.
+   - The light-theme footer timezone has `opacity: 1` (4.75:1).
+   - The pending footer LinkedIn icon is `role="img"`. It is not focusable and not a link until
+     its URL is confirmed.
+   - Brand links: `aria-label="FA Faizan Ali, go to homepage"`, plus a space between the two
+     spans. The space is not rendered (flex container).
+   - Favicon: `web/src/app/icon.svg` (the FA brand icon).
+   - The suites apply these changes to V21 too, through `harness.cjs`, which injects
+     `approved-changes.css` into every V21 page.
+
 How they are applied: label text, plus modifier classes (`.home-section-label`,
 `.photo-label-muted`) styled in `web/src/styles/approved-changes.css`, which loads after the
 legacy file. The label size is 15px. Plain `.eyebrow` elements elsewhere stay at 11px.
@@ -138,6 +156,14 @@ Removing the About switch makes the intro row shorter. The About content therefo
 - Report meaningful differences with an explanation. Never hide them by raising tolerances
   silently. Removed review-only elements are the only expected differences, and they are masked
   explicitly.
+- **Regression suites:** `web/tests/regression/` (run with `npm run test:regression`; see its
+  README).
+  - Each suite applies the approved changes to the V21 page before comparing. Everything else
+    must match V21.
+  - `run.cjs` fixes the expected check count of every suite. A suite with fewer checks fails.
+    Change a count only together with the suite, and explain why.
+  - When a page or feature changes, update or extend its suite in the same step. Never weaken a
+    check to make it pass: find out whether the app or the test is wrong, and report it.
 
 ## Next.js notes
 
@@ -153,4 +179,4 @@ Removing the About switch makes the intro row shorter. The About content therefo
 ## Commands (run in `web/`)
 
 `npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck` · `npm run format:check` ·
-`npm run test:e2e` · `npm run test:visual` · `npm run reference`
+`npm run test:e2e` · `npm run test:visual` · `npm run test:regression` · `npm run reference`
