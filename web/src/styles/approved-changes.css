@@ -1,0 +1,70 @@
+/*
+ * User-approved deviations from V21 (see CLAUDE.md, "Approved design
+ * changes"). Loaded after the legacy stylesheet. Every rule is scoped to an
+ * explicit modifier class, so nothing else on the site is affected.
+ */
+
+/*
+ * Phase 2: the four homepage section labels (About me, Selected work,
+ * Expertise, Contact) are a little larger than V21's 11px eyebrow. Colour,
+ * uppercase, letter-spacing and weight stay as in .eyebrow. Other eyebrows
+ * (e.g. "Featured case study", the CV modal) are unchanged.
+ */
+.eyebrow.home-section-label {
+  font-size: 15px;
+}
+
+/*
+ * Phase 2: the hero photo panel label ("Professional photo coming soon") is
+ * slightly smaller and muted. Its spacing is the V21 .photo-label spacing, so
+ * the frame and avatar outline are unchanged.
+ */
+.photo-label.photo-label-muted {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 620px) {
+  .photo-label.photo-label-muted {
+    font-size: 13px;
+  }
+}
+
+/*
+ * Phase 2: home About section spacing refinement (approved 2026-11-03).
+ * Scoped to .about-home-v15, which only the homepage About section uses.
+ * - The label sits closer to the heading (V21: 24px below the intro row).
+ * - The copy column starts at the top instead of being centred against the
+ *   taller Tech Visual card; centring pushed the heading 25-51px further away
+ *   from the label on desktop.
+ * - Paragraph lines are capped at a comfortable reading length (V21: 610px).
+ * Heading size, text, colours and the Tech Visual are unchanged.
+ */
+.about-home-v15 .about-home-intro {
+  margin-bottom: 14px;
+}
+.about-home-v15 .about-home-columns {
+  align-items: start;
+}
+.about-home-v15 .about-home-copy p {
+  max-width: 35em;
+}
+
+/*
+ * Phase 2: employer names in the home About copy are external links
+ * (approved 2026-11-03). They keep the bold V21 text colour and turn orange on
+ * hover or keyboard focus; focus also shows the site-wide V21 :focus-visible
+ * outline.
+ */
+.about-company-link {
+  transition: color 0.22s ease;
+}
+.about-company-link:hover,
+.about-company-link:focus-visible {
+  color: var(--orange);
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-company-link {
+    transition: none;
+  }
+}

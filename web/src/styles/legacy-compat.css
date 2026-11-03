@@ -1,0 +1,17 @@
+/*
+ * Build-compatibility fixes for the verbatim V21 stylesheet. Nothing here
+ * changes the design: each rule restores a V21 value that the Next.js CSS
+ * pipeline (Lightning CSS) drops while processing legacy/styles.css.
+ *
+ * V21 declares `backdrop-filter` followed by `-webkit-backdrop-filter` on the
+ * two navbar rules below. Lightning CSS merges the pair into the prefixed form
+ * only, which Chrome ignores, so the frosted-glass navbar loses its blur.
+ * Re-declaring the standard property (same selectors, same values, loaded
+ * after the legacy file) gives exactly the V21 result.
+ */
+.navbar {
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+.floating-header .navbar {
+  backdrop-filter: blur(15px) saturate(1.13);
+}

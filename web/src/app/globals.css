@@ -15,8 +15,22 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/*
+ * V21 class names that are also Tailwind utility names. Tailwind would
+ * generate them because they appear in our markup, and Tailwind's .container
+ * adds a max-width (e.g. 48rem between 768px and 1023px) that V21 never sets,
+ * narrowing every .container. Never generate these two; the V21 rules alone
+ * style them. (Checked against all class names in design-reference/.)
+ */
+@source not inline("container");
+@source not inline("visible");
+
 /* Approved V21 portfolio stylesheet */
 @import "../styles/legacy/styles.css";
+/* Restores V21 values the CSS build drops (no design changes) */
+@import "../styles/legacy-compat.css";
+/* User-approved deviations from V21, each scoped to a modifier class */
+@import "../styles/approved-changes.css";
 /*
  * Reference design tokens exposed to Tailwind for the later, gradual
  * conversion. Values resolve to the CSS variables defined by the V21

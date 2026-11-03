@@ -29,8 +29,8 @@ personal-portfolio/
 └─ CLAUDE.md           Working rules for AI-assisted development
 ```
 
-There is one Git repository, at this root (branch `main`, local only, no remote yet). `web/` is
-not a nested repository.
+There is one Git repository, at this root (branch `main`, remote `origin` on GitHub:
+`faizandevx/personal-portfolio`). `web/` is not a nested repository.
 
 ## Requirements
 
@@ -89,8 +89,8 @@ routes can be added later for the contact form and the AI assistant.
 | Phase | Scope                                                                        | Status                                     |
 | ----- | ---------------------------------------------------------------------------- | ------------------------------------------ |
 | 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                     |
-| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | Built (Steps A–H); awaiting final approval |
-| 2     | Home page                                                                    | Not started                                |
+| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | ✅ Complete (approved)                     |
+| 2     | Home page                                                                    | Steps 2A–2D complete (approved); 2E next   |
 | 3     | About page                                                                   | Not started                                |
 | 4     | Projects, project detail, Experience                                         | Not started                                |
 | 5     | Contact + FAQ                                                                | Not started                                |
@@ -114,11 +114,54 @@ verified unchanged against SHA-256 checksums.
 - G: footer (live year, back to top; LinkedIn non-clickable until its URL is confirmed)
 - H: CV modal (accessible dialog; states honestly that the CV is not available yet)
 
-All Phase 1 features are built and awaiting final approval. The home page has a clearly marked
-temporary scroll-test spacer, which is removed in Phase 2.
+Phase 1 is complete and approved.
+
+**Phase 2 progress:**
+
+- 2A: home hero (Learn-more scroll, hero CV button, GitHub link, LinkedIn pending). The photo
+  panel keeps the V21 frame and avatar outline with the label "Professional photo coming soon".
+  Also fixes two build issues that affected the Phase 1 shell (see CLAUDE.md, CSS strategy).
+- 2B: About section with the "From idea to impact" Tech Visual and the four expertise cards.
+  The label reads ABOUT ME at 15px, and the preview switch and second-photo panel are not ported.
+  It replaces the temporary spacer. The hero photo label is now smaller and muted.
+- 2C: Selected work + Expertise. The labels read SELECTED WORK and EXPERTISE. Cards, chips and
+  links use the final routes: `/projects`, `/experience` and `/about`. The featured card goes to
+  `/projects` until the case studies exist, and the V21 intro text is kept. Those routes show a
+  404 until Phases 3–4, the same as the header links.
+- 2D: Contact section, with the label CONTACT.
+  - **Ask Faizan AI** is a scripted demo with three pre-written answers. Its subtitle reads
+    "Scripted demo", and it shows the DEMO pill and "Scripted responses · No live AI yet". No AI
+    service is called.
+  - **Let's Chat** opens an accessible "WhatsApp connection coming soon" modal. No number is
+    published and no chat is opened.
+  - The CV and WhatsApp modals share one dialog hook (`src/hooks/useModalDialog.ts`).
+- 2E: homepage parity and behaviour tests in `tests/`, docs, Phase 2 report (next).
 
 ## Not yet functional (by design)
 
 The site is still a scaffold. The CV download, WhatsApp chat, LinkedIn link,
 contact-form delivery and AI assistant are not connected. They will never be shown as
 working until they really are.
+
+### Links to pages not built yet
+
+Only `/` exists so far. These links already use their final routes and show a 404 until the
+page is migrated:
+
+| Route         | Linked from                                                                                                    | Arrives in |
+| ------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| `/about`      | Header, footer, hero "About Me", About "More About Me", "Ask Faizan AI" card, Expertise "More about my skills" | Phase 3    |
+| `/projects`   | Header, footer, "All projects", "Featured case study" card (moves to a `/projects/[slug]` case study later)    | Phase 4    |
+| `/experience` | Header, footer, "Digital banking" card                                                                         | Phase 4    |
+| `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan"                                       | Phase 5    |
+| `/faq`        | Header, footer                                                                                                 | Phase 5    |
+
+### Known minor issues
+
+- **No favicon.** The browser's automatic `/favicon.ico` request returns a 404 and logs one
+  console error. V21 has no favicon either. To fix later (Phase 6 hardening), without changing
+  the design.
+- **Low contrast on one label (light theme).** The orange 11px "LET'S CHAT" eyebrow in the
+  WhatsApp modal scores 2.78:1 on white (axe `color-contrast`; WCAG AA needs 4.5:1). This is
+  the V21 design, identical in `design-reference/`. Any colour change needs approval
+  (Phase 6).

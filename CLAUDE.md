@@ -35,6 +35,15 @@ See `README.md` for commands and phase status.
   Every extracted file in `design-reference/` and `web/src/styles/legacy/styles.css` must match it
   exactly. The root `.prettierignore` stops editor format-on-save or "Format Document" from
   touching `design-reference/` and `web/src/styles/legacy/`.
+- **Build-compatibility fixes** (Phase 2 Step 2A). Neither one changes the design:
+  - `globals.css` has `@source not inline("container")` and `@source not inline("visible")`.
+    These are the only V21 class names that are also Tailwind utilities (checked against every
+    class in `design-reference/`). Tailwind's `.container` added a `max-width` that narrowed
+    every V21 container at 840–1023px.
+  - `web/src/styles/legacy-compat.css` is imported right after the legacy file. It re-declares
+    V21 values that Lightning CSS drops. Currently that is the two navbar `backdrop-filter` rules,
+    where the `backdrop-filter` + `-webkit-backdrop-filter` pair was collapsed to the prefixed
+    form only, which Chrome ignores. Only exact V21 values go there, never design changes.
 - Do not split or rewrite the legacy CSS early. A later, gradual Tailwind conversion happens one
   component at a time, and only when the screenshot parity tests still pass.
 - Keep the reference DOM structure. Selectors depend on it: `.inside-hero:has(+ …)`,
@@ -68,14 +77,49 @@ intentional differences.
    second-photo panel from the homepage About section. Keep the approved Tech Visual (`tech-v16`)
    unchanged.
 4. Housekeeping (not a design change): remove the TEMPORARY scroll-test spacer `<section>` in
-   `web/src/app/page.tsx` that was added in Phase 1 Step F.
+   `web/src/app/page.tsx` that was added in Phase 1 Step F. (Done in Step 2B.)
+5. Hero photo panel (approved 2026-11-03). Keep the V21 frame and avatar outline. Remove the
+   upload control, the instructions and the "Photo-ready hero" tag. Show only the label
+   "Professional photo coming soon", slightly smaller and muted (14px, or 13px at ≤620px; weight
+   600; `--muted`).
+
+6. Home About spacing refinement (approved 2026-11-03), scoped to `.about-home-v15`:
+   - The label row's gap drops from 24px to 14px.
+   - The columns are top-aligned instead of centred. Centring had pushed the heading 49–75px
+     below the label on desktop.
+   - Paragraphs are capped at `35em` (V21: 610px).
+
+   Heading size, text, colours and the Tech Visual are unchanged.
+
+7. Home About employer links (approved 2026-11-03):
+   - The name "AlphaSoft K60" is corrected to **AlphaSoft360**.
+   - **AlphaSoft360** (`https://www.alphasoft360.com/`) and **Aman Bank**
+     (`https://www.aman-bank.com/`) become external links. They open in a new tab with
+     `rel="noopener noreferrer"`, and each has a visually hidden "(opens in a new tab)".
+   - They stay bold and turn orange on hover and keyboard focus, with a 0.22s transition that
+     is turned off for reduced motion.
+
+8. Home Contact wording (approved 2026-11-03). This replaces review-only text with honest text
+   for visitors:
+   - **WhatsApp modal body:** "WhatsApp chat isn't available yet. In the meantime, you're welcome
+     to get in touch through the Contact page or by email at faizandevx@gmail.com."
+   - **Ask Faizan AI subtitle:** "Portfolio guide · Scripted demo".
+   - **Hidden accessible labels:** "Let's Chat on WhatsApp (coming soon)" and "Ask Faizan AI
+     (scripted demo)".
+   - Never add a WhatsApp number, a `wa.me` link or a live AI call without approval.
+
+How they are applied: label text, plus modifier classes (`.home-section-label`,
+`.photo-label-muted`) styled in `web/src/styles/approved-changes.css`, which loads after the
+legacy file. The label size is 15px. Plain `.eyebrow` elements elsewhere stay at 11px.
+Removing the About switch makes the intro row shorter. The About content therefore starts about
+21px higher, or about 56px higher at ≤760px, where the switch had its own row. This is expected.
 
 ## Git
 
 - There is one repository, at `personal-portfolio/` (branch `main`). Never create a nested repo
   in `web/`.
-- It is local only. Do not add a remote or push without explicit approval. Commit only when the
-  user asks.
+- The remote is `origin` (GitHub, `faizandevx/personal-portfolio`, branch `main`). Commit and push
+  only when the user explicitly approves. Never force-push or rewrite history.
 - `.gitattributes` forces LF line endings and marks `design-reference/**` as `-text`, so Git
   never rewrites the reference files (this machine has `core.autocrlf=true`).
 - Never commit `.env*` files (except `.env.example`), credentials or confidential data.
