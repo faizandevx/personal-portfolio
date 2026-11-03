@@ -156,6 +156,16 @@ page is migrated:
 | `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan"                                       | Phase 5    |
 | `/faq`        | Header, footer                                                                                                 | Phase 5    |
 
+### Regression scripts not yet tracked in Git
+
+The 563 Phase 2 regression checks, across 11 Playwright scripts, are **not yet in Git**. They
+compare every homepage section, the shell and the modals against V21. The repository's
+`web/tests/` currently holds only the e2e smoke tests.
+
+Until Phase 2 Step 2E moves the scripts into `web/tests/`, they are kept on the development
+machine in `.local/regression-2e/`. That folder is excluded locally through
+`.git/info/exclude` and is never pushed, and its own `README.md` explains how to run them.
+
 ### Known minor issues
 
 - **No favicon.** The browser's automatic `/favicon.ico` request returns a 404 and logs one
