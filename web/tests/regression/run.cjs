@@ -19,7 +19,8 @@ const { WEB_DIR, APP_URL, REFERENCE_URL, CHANNEL } = require("./harness.cjs");
 // Expected number of checks per suite. Change a count only together with the
 // suite itself, and say why in the change description.
 const SUITES = [
-  ["contact", 88, "Phase 2D: Contact section, Ask Faizan AI, WhatsApp modal"],
+  // 88 checks from Step 2D + 1 for the approved "no kiosks" content correction.
+  ["contact", 89, "Phase 2D: Contact section, Ask Faizan AI, WhatsApp modal"],
   ["work-skills", 72, "Phase 2C: Selected work + Expertise"],
   ["about", 87, "Phase 2B: About section and Tech Visual"],
   ["company-links", 44, "Phase 2B: AlphaSoft360 / Aman Bank links"],
@@ -43,7 +44,7 @@ const SUITES = [
     "Phase 3: /about page (3B hero + workflow visual; 3C story, at a glance, career journey; 3D capabilities, approach, education, CTA; 3E whole page)",
   ],
 ];
-// The first 11 suites are the 563 checks carried over from Phases 1-2D;
+// The first 11 suites are the 564 checks from Phases 1-2D (563 + the kiosk correction);
 // "homepage" (Step 2E) and "about-page" (Phase 3) are reported separately.
 const ORIGINAL = SUITES.filter(([name]) => !["homepage", "about-page"].includes(name)).map(
   ([name]) => name,

@@ -17,7 +17,7 @@ const scripted = {
     label: "Banking experience",
     question: "What is his banking experience?",
     answer:
-      "He has worked on digital banking projects involving customer channels, service integrations, kiosks, and coordination across technical teams.",
+      "He has worked on digital banking projects involving customer channels, service integrations, and coordination across technical teams.",
   },
   contact: {
     label: "How to connect?",

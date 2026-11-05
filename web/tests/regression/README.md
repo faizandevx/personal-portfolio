@@ -66,7 +66,7 @@ comparing.
 
 | Suite           | Checks | Covers                                                                                                                                                                                                           |
 | --------------- | -----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `contact`       |     88 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe                                                                                                                                               |
+| `contact`       |     89 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe, no kiosk references                                                                                                                          |
 | `work-skills`   |     72 | 2C: Selected work + Expertise                                                                                                                                                                                    |
 | `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                                                                                                                                               |
 | `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                                                                                                                                               |
@@ -80,7 +80,8 @@ comparing.
 | `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                              |
 | `about-page`    |    283 | 3: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
 
-The first 11 suites are the 563 checks built during Phases 1–2D. `homepage` was added in
+The first 11 suites are the 563 checks built during Phases 1–2D, plus 1 for the approved kiosk
+content correction (564). `homepage` was added in
 Step 2E (39 checks); Phase 6 added 13 accessibility checks (contrast in default, hover and focus
 states, decorative colours, favicon, footer LinkedIn, brand name). The axe checks require zero
 violations in the app.

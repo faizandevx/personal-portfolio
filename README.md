@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (898 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (899 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Reserved environment variables (none are used yet)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,7 +58,7 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 898 checks (about 37 min)
+npm run test:regression     # V21 parity + behaviour suites, 899 checks (about 37 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (estimated 25 min)

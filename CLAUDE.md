@@ -150,6 +150,14 @@ intentional differences.
     work." V21's second sentence ("Earlier qualifications are intentionally not displayed in this
     portfolio.") is removed. Never invent other education details.
 
+**Content correction: no kiosk references** (approved 2026-11-05)
+
+17. "kiosks" is removed from the Ask Faizan AI banking answer, which now reads "He has worked on
+    digital banking projects involving customer channels, service integrations, and coordination
+    across technical teams." Never add kiosk-related information to any portfolio page. V21's
+    `app.js` keeps the old text because `design-reference/` is read-only. The `contact` suite applies
+    the correction to the V21 page before comparing, and checks that `web/src` has no "kiosk".
+
 How they are applied: label text, plus modifier classes (`.home-section-label`,
 `.photo-label-muted`) styled in `web/src/styles/approved-changes.css`, which loads after the
 legacy file. The label size is 15px. Plain `.eyebrow` elements elsewhere stay at 11px.
@@ -166,7 +174,7 @@ Read this first when resuming after a compaction or in a new session.
   (2026-11-05): 898/898 regression checks, lint, typecheck, format, build, e2e and a production-mode
   `/about` smoke test all pass.
 - **Next:** Phase 4 (Projects, `/projects/[slug]`, Experience). Do not start it without approval.
-- **Regression totals:** 898 checks (`npm run test:regression`, about 37 min). `about-page` is 283. Run only the affected suites during a step
+- **Regression totals:** 899 checks (`npm run test:regression`, about 37 min). `about-page` is 283. Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
 - **Unfinished destinations** (404 until built): `/projects`, `/experience` (Phase 4);
   `/contact`, `/faq` (Phase 5).

@@ -64,6 +64,13 @@ async function open(b, url, o = {}) {
       s.querySelector(".mini-ai-identity small").textContent = "Portfolio guide · Scripted demo";
       const box = document.querySelector(".whatsapp-preview-box p");
       if (box) box.textContent = WA_TEXT;
+      // Approved content correction: no "kiosks" in the banking answer. V21's app.js
+      // writes the answer on each click, so it is corrected as soon as it is written.
+      const answer = document.getElementById("miniAiAnswer");
+      new MutationObserver(() => {
+        if (answer.textContent.includes(" kiosks,"))
+          answer.textContent = answer.textContent.replace(" kiosks,", "");
+      }).observe(answer, { childList: true, characterData: true, subtree: true });
     }, WA_TEXT);
   }
   await p.waitForTimeout(300);
@@ -378,6 +385,24 @@ const wa = (p) =>
       ),
     );
     check("no network request for answers (scripted only)", true);
+    // Approved content correction: kiosks must not appear anywhere in the portfolio.
+    await app.click('.mini-ai-question[data-ai-question="banking"]');
+    await app.waitForTimeout(100);
+    const SRC = WEB_DIR + "/src/";
+    const sources = fs
+      .readdirSync(SRC, { recursive: true })
+      .filter((f) => fs.statSync(SRC + f).isFile())
+      .filter((f) => /kiosk/i.test(fs.readFileSync(SRC + f, "utf8")));
+    const aboutHtml = await (await app.request.get(APP + "about")).text();
+    check(
+      "banking answer has the approved wording; 'kiosk' is not on the rendered / or /about, or anywhere in web/src",
+      (await ai(app)).a ===
+        "He has worked on digital banking projects involving customer channels, service integrations, and coordination across technical teams." &&
+        !/kiosk/i.test(await app.evaluate(() => document.body.innerHTML)) &&
+        !/kiosk/i.test(aboutHtml) &&
+        sources.length === 0,
+      sources.join(", "),
+    );
     await ref.context().close();
     await app.context().close();
   }
