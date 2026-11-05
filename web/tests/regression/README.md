@@ -10,16 +10,16 @@ documented tolerances), hover states, animations, keyboard use, focus handling, 
 
 ```bash
 cd web
-npm run test:regression                    # all suites, one at a time (about 22 minutes)
+npm run test:regression                    # all suites, one at a time (about 37 minutes)
 npm run test:regression -- hero contact    # selected suites
 npm run test:regression:list               # suites and expected check counts
-npm run test:regression:parallel           # up to 3 suites at once (same checks, about 14 minutes)
+npm run test:regression:parallel           # up to 3 suites at once (same checks, estimated 25 minutes)
 npm run test:regression -- --jobs 2        # choose the number of parallel suites
 ```
 
 `--jobs` runs only the suites that compare layout, styles, pixels, links and focus in
 parallel. The suites whose checks measure timing still run one at a time, after the others:
-`contact`, `scroll`, `toggle`, `drawer` and `cv-scrollbar`. They check animation replay,
+`contact`, `scroll`, `toggle`, `drawer`, `cv-scrollbar` and `about-page`. They check animation replay,
 scroll damping, transitions and real scrollbars. Coverage and tolerances are the same in
 both modes.
 
@@ -37,7 +37,8 @@ The counts are listed in `run.cjs`, so coverage can't shrink without anyone noti
 a count only together with the suite itself, and explain why in the commit message.
 
 Outputs (git-ignored): `test-results/regression/logs/<suite>.log`, with one PASS/FAIL line per
-check, and `test-results/regression/screenshots/`.
+check, and `test-results/regression/screenshots/`. Any Playwright run (such as `npm run test:e2e`)
+clears `test-results/`, so copy the logs first if you need to keep them.
 
 ## Settings
 
@@ -63,20 +64,21 @@ comparing.
 
 ## Suites
 
-| Suite           | Checks | Covers                                                                              |
-| --------------- | -----: | ----------------------------------------------------------------------------------- |
-| `contact`       |     88 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe                  |
-| `work-skills`   |     72 | 2C: Selected work + Expertise                                                       |
-| `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                  |
-| `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                  |
-| `hero`          |     86 | 2A: home hero, Learn more, photo panel                                              |
-| `toggle`        |     28 | 1: theme toggle                                                                     |
-| `drawer`        |     22 | 1: mobile drawer                                                                    |
-| `scroll`        |     40 | 1: two-stage scroll navigation                                                      |
-| `footer`        |     36 | 1: footer                                                                           |
-| `cv-modal`      |     54 | 1: CV modal                                                                         |
-| `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                     |
-| `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes) |
+| Suite           | Checks | Covers                                                                                                                                                                                                           |
+| --------------- | -----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contact`       |     88 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe                                                                                                                                               |
+| `work-skills`   |     72 | 2C: Selected work + Expertise                                                                                                                                                                                    |
+| `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                                                                                                                                               |
+| `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                                                                                                                                               |
+| `hero`          |     86 | 2A: home hero, Learn more, photo panel                                                                                                                                                                           |
+| `toggle`        |     28 | 1: theme toggle                                                                                                                                                                                                  |
+| `drawer`        |     22 | 1: mobile drawer                                                                                                                                                                                                 |
+| `scroll`        |     40 | 1: two-stage scroll navigation                                                                                                                                                                                   |
+| `footer`        |     36 | 1: footer                                                                                                                                                                                                        |
+| `cv-modal`      |     54 | 1: CV modal                                                                                                                                                                                                      |
+| `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                  |
+| `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                              |
+| `about-page`    |    283 | 3: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
 
 The first 11 suites are the 563 checks built during Phases 1–2D. `homepage` was added in
 Step 2E (39 checks); Phase 6 added 13 accessibility checks (contrast in default, hover and focus

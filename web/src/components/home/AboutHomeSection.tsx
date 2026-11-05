@@ -1,5 +1,6 @@
 import Link from "next/link";
 import TechVisual from "@/components/home/TechVisual";
+import EmployerLink from "@/components/ui/EmployerLink";
 
 // The V21 home "About me" section (design-reference/index.html, #home-about).
 // Approved Phase 2 changes: the label has no "01 /" prefix and uses the larger
@@ -29,25 +30,11 @@ export default function AboutHomeSection() {
             <p>
               I&apos;ve worked as a Software Developer at{" "}
               <strong>
-                <a
-                  className="about-company-link"
-                  href="https://www.alphasoft360.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  AlphaSoft360<span className="sr-only"> (opens in a new tab)</span>
-                </a>
+                <EmployerLink employer="alphasoft360" />
               </strong>{" "}
               and as an IT Project Manager at{" "}
               <strong>
-                <a
-                  className="about-company-link"
-                  href="https://www.aman-bank.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Aman Bank<span className="sr-only"> (opens in a new tab)</span>
-                </a>
+                <EmployerLink employer="amanBank" />
               </strong>
               , bringing both engineering and delivery perspectives to the table.
             </p>

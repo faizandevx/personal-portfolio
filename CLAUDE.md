@@ -126,11 +126,54 @@ intentional differences.
    - The suites apply these changes to V21 too, through `harness.cjs`, which injects
      `approved-changes.css` into every V21 page.
 
+**Phase 3: About page** (approved 2026-11-04)
+
+10. The five numbered About section labels ("01 / About me" … "05 / Education") lose their
+    numbers and use the 15px section-label size (`.about-section-label`, same rule as
+    `.home-section-label`). Unnumbered small labels stay as in V21.
+11. "AlphaSoft K60" is corrected to AlphaSoft360 in both places (Step 3C). In the story
+    paragraph, AlphaSoft360 and "Aman Bank for Commerce & Investment" use the same external
+    links as the homepage. Career-card names stay plain text.
+12. The light-theme large-accent orange (`--orange-large`) also applies to `h1 .accent`
+    ("Beyond the delivery.") and `.about-v18-identity h3 .accent` ("One approach.").
+13. The hero workflow card follows V21 exactly: dark navy in the dark theme, warm white in
+    the light theme.
+14. The meta description uses visitor-facing text. V21's says "interactive design preview".
+15. About hero spacing (approved 2026-11-04, CSS only, markup unchanged).
+    - The label → heading gap is 22px at every width (h1 `margin-top: 3px`). V21 had 31px
+      stacked and 63–83px on desktop.
+    - Desktop two-column layout (1041px and up): the label joins the text column, and label,
+      heading, text and buttons are centred together against the workflow card. Column sizes,
+      the gap, the card and the breakpoints are V21's.
+
+16. Education note (approved 2026-11-04, Step 3E): "The degree most relevant to my professional
+    work." V21's second sentence ("Earlier qualifications are intentionally not displayed in this
+    portfolio.") is removed. Never invent other education details.
+
 How they are applied: label text, plus modifier classes (`.home-section-label`,
 `.photo-label-muted`) styled in `web/src/styles/approved-changes.css`, which loads after the
 legacy file. The label size is 15px. Plain `.eyebrow` elements elsewhere stay at 11px.
 Removing the About switch makes the intro row shorter. The About content therefore starts about
 21px higher, or about 56px higher at ≤760px, where the switch had its own row. This is expected.
+
+## Current status and handoff
+
+Read this first when resuming after a compaction or in a new session.
+
+- **Done and pushed:** Phases 0, 1, 2 (homepage), Phase 6 homepage accessibility, and Phase 3
+  (About page `/about`, Steps 3A–3E). About components live in `web/src/components/about/`, plus
+  `hero/InsideHero.tsx`, `ui/EmployerLink.tsx` and `content/experience.ts`. Final verification
+  (2026-11-05): 898/898 regression checks, lint, typecheck, format, build, e2e and a production-mode
+  `/about` smoke test all pass.
+- **Next:** Phase 4 (Projects, `/projects/[slug]`, Experience). Do not start it without approval.
+- **Regression totals:** 898 checks (`npm run test:regression`, about 37 min). `about-page` is 283. Run only the affected suites during a step
+  (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
+- **Unfinished destinations** (404 until built): `/projects`, `/experience` (Phase 4);
+  `/contact`, `/faq` (Phase 5).
+- **Proposed, not approved:** when Escape closes the mobile drawer, focus falls back to the page
+  `<body>` (as in V21). Returning it to the menu button is a candidate Phase 6 hardening item,
+  because it changes approved header behaviour.
+- Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git
 

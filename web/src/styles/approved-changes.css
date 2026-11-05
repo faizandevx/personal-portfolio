@@ -10,7 +10,9 @@
  * uppercase, letter-spacing and weight stay as in .eyebrow. Other eyebrows
  * (e.g. "Featured case study", the CV modal) are unchanged.
  */
-.eyebrow.home-section-label {
+.eyebrow.home-section-label,
+.eyebrow.about-section-label {
+  /* Phase 3: the About page's numbered section labels use the same size. */
   font-size: 15px;
 }
 
@@ -89,7 +91,9 @@ html[data-theme="light"] {
 html[data-theme="light"]
   :is(
     .hero-copy h1 .line-accent,
+    h1 .accent,
     h2 .accent,
+    .about-v18-identity h3 .accent,
     .tech-v16-heading span,
     .footer-reference-brand span
   ) {
@@ -124,4 +128,44 @@ html[data-theme="light"] .about-v18-text-link span:first-child::after {
  */
 html[data-theme="light"] .footer-timezone {
   opacity: 1;
+}
+
+/*
+ * Phase 3: About hero spacing refinement (approved 2026-11-04). Markup unchanged.
+ * - All widths: the "ABOUT ME" label sits closer to the heading (h1 top margin
+ *   12px -> 3px; V21's gap was 31px, or 63-73px on desktop).
+ * - Desktop two-column layout (V21 stacks below 1041px): the label joins the text
+ *   column, and label + heading + text + buttons are centred together against the
+ *   workflow card. V21 centred only the text, under a label that sat above both
+ *   columns, which pushed the heading away from it. Column sizes and gap are V21's.
+ */
+.about-v18-hero-grid h1 {
+  margin-top: 3px;
+}
+@media (min-width: 1041px) {
+  .about-v18-hero-inner:has(> .about-v18-hero-grid .v21-workflow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    /* Equal flexible rows above and below centre the left block against the card. */
+    grid-template-rows: 1fr auto auto 1fr;
+    column-gap: clamp(24px, 3vw, 50px);
+  }
+  .about-v18-hero-inner > .about-v18-hero-grid:has(.v21-workflow) {
+    display: contents;
+  }
+  .about-v18-hero-inner:has(> .about-v18-hero-grid .v21-workflow) > .eyebrow {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .about-v18-hero-grid:has(.v21-workflow) > div:first-child {
+    grid-column: 1;
+    grid-row: 3;
+    /* V21's label-to-grid spacing (.about-v18-hero-grid margin-top). */
+    margin-top: 19px;
+  }
+  .about-v18-hero-grid > .v21-workflow {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: center;
+  }
 }

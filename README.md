@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (615 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (898 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Reserved environment variables (none are used yet)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,10 +58,10 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 615 checks (about 22 min)
+npm run test:regression     # V21 parity + behaviour suites, 898 checks (about 37 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
-npm run test:regression:parallel          # same checks, up to 3 suites at once (about 14 min)
+npm run test:regression:parallel          # same checks, up to 3 suites at once (estimated 25 min)
 ```
 
 ## Tech stack
@@ -95,11 +95,11 @@ routes can be added later for the contact form and the AI assistant.
 | ----- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
 | 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                                |
 | 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | ✅ Complete (approved)                                |
-| 2     | Home page                                                                    | Steps 2A–2D complete (approved); 2E next              |
-| 3     | About page                                                                   | Not started                                           |
+| 2     | Home page                                                                    | ✅ Complete (approved, pushed)                        |
+| 3     | About page                                                                   | ✅ Complete (approved, pushed)                        |
 | 4     | Projects, project detail, Experience                                         | Not started                                           |
 | 5     | Contact + FAQ                                                                | Not started                                           |
-| 6     | Hardening (performance, a11y, SEO, 404)                                      | Homepage accessibility fixes built; awaiting approval |
+| 6     | Hardening (performance, a11y, SEO, 404)                                      | Homepage accessibility done (pushed); rest later      |
 | 7     | Replace demo functionality (CV, LinkedIn, WhatsApp, contact backend, photos) | Not started, each item approved separately            |
 
 Each phase finishes with build, lint, typecheck and tests passing and a report, and the next phase waits for approval.
@@ -148,6 +148,46 @@ Phase 1 is complete and approved.
     (615 after Phase 6 added 13 accessibility checks).
   - The runner also verifies `design-reference/` against the V21 checksums.
 
+**Phase 3 progress (About page, `/about`):**
+
+- 3B: the route and its metadata, plus the shared `InsideHero` (the inner-page hero with the
+  hero header), which later pages reuse.
+  - About hero with the "From idea to impact" workflow visual: four steps, a staggered
+    reveal, pulsing arrows, icon hover, and reduced-motion support. The card is dark navy in
+    the dark theme and warm white in the light theme, as in V21.
+  - The label reads ABOUT ME at 15px.
+  - Approved spacing refinement: label → heading 22px at every width; on desktop the label
+    and text are centred together against the card.
+  - A temporary `#my-story` target serves "Discover my story" until 3C. 78 checks in
+    `about-page`.
+- 3C: Story, the "At a glance" card and Career journey.
+  - AlphaSoft360 replaces "AlphaSoft K60" everywhere, and the story's employer names link to
+    their websites.
+  - The shared `ui/EmployerLink` is now used by both the homepage and the About page.
+  - The job data lives in `content/experience.ts`.
+  - The label reads CAREER JOURNEY at 15px.
+  - The temporary `#my-story` target is replaced by the real section. 145 checks in
+    `about-page`.
+- 3D: Capabilities (three skill cards), My approach (three numbered steps), Education and the
+  closing CTA.
+  - The labels read CAPABILITIES, MY APPROACH and EDUCATION at 15px. The approach step
+    numbers (01–03) are part of the step design and are kept.
+  - The footer "Education" link lands on `/about#education`.
+  - The CTA links use `/projects` and `/contact`.
+  - 245 checks in `about-page`.
+- 3E: Education wording and whole-page review.
+  - The Education note reads "The degree most relevant to my professional work." (approved
+    Option A; V21's sentence about earlier qualifications is removed).
+  - 38 whole-page checks: every section's position, height and padding plus full-page pixels
+    at 8 widths × 2 themes; the full keyboard Tab order with visible focus; the mobile drawer
+    by keyboard; every animation and transition with and without reduced motion; and every
+    link destination. 283 checks in `about-page`, 898 in the full suite.
+  - Final verification (2026-11-05): 898 of 898 regression checks passed in 37.1 min, with
+    `design-reference/` matching its V21 checksums. Lint, typecheck, format, build and the 2 e2e
+    smoke tests also passed. A production-mode check of `/about` (`next start`, 3 widths) confirmed
+    that it loads, both themes work, and there are no browser errors beyond the known 404s below.
+- Next: Phase 4 (Projects, project detail, Experience), after approval.
+
 ## Not yet functional (by design)
 
 The site is still a scaffold. The CV download, WhatsApp chat, LinkedIn link,
@@ -156,16 +196,15 @@ working until they really are.
 
 ### Links to pages not built yet
 
-Only `/` exists so far. These links already use their final routes and show a 404 until the
-page is migrated:
+`/` and `/about` exist so far (all About sections are migrated). These links already use their final routes and show a 404
+until the page is migrated:
 
-| Route         | Linked from                                                                                                    | Arrives in |
-| ------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
-| `/about`      | Header, footer, hero "About Me", About "More About Me", "Ask Faizan AI" card, Expertise "More about my skills" | Phase 3    |
-| `/projects`   | Header, footer, "All projects", "Featured case study" card (moves to a `/projects/[slug]` case study later)    | Phase 4    |
-| `/experience` | Header, footer, "Digital banking" card                                                                         | Phase 4    |
-| `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan"                                       | Phase 5    |
-| `/faq`        | Header, footer                                                                                                 | Phase 5    |
+| Route         | Linked from                                                                                                                                                             | Arrives in |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `/projects`   | Header, footer, "All projects", "Featured case study" card (moves to a `/projects/[slug]` case study later), About hero "Explore my work", About CTA "Explore projects" | Phase 4    |
+| `/experience` | Header, footer, "Digital banking" card, About "View my professional experience" and "Full experience"                                                                   | Phase 4    |
+| `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan", About CTA "Get in touch"                                                                      | Phase 5    |
+| `/faq`        | Header, footer                                                                                                                                                          | Phase 5    |
 
 ### Accessibility (Phase 6)
 

@@ -37,14 +37,21 @@ const SUITES = [
     52,
     "Phase 2E + 6: whole homepage (structure, links, keyboard, axe, motion, overflow, a11y fixes)",
   ],
+  [
+    "about-page",
+    283,
+    "Phase 3: /about page (3B hero + workflow visual; 3C story, at a glance, career journey; 3D capabilities, approach, education, CTA; 3E whole page)",
+  ],
 ];
 // The first 11 suites are the 563 checks carried over from Phases 1-2D;
-// "homepage" was added in Step 2E and is reported separately.
-const ORIGINAL = SUITES.filter(([name]) => name !== "homepage").map(([name]) => name);
+// "homepage" (Step 2E) and "about-page" (Phase 3) are reported separately.
+const ORIGINAL = SUITES.filter(([name]) => !["homepage", "about-page"].includes(name)).map(
+  ([name]) => name,
+);
 // Suites with checks that measure timing (scroll damping, animation replay,
 // transitions, classic scrollbars). With --jobs they still run one at a time,
 // after the others, so CPU contention cannot affect their results.
-const TIMING = ["contact", "scroll", "toggle", "drawer", "cv-scrollbar"];
+const TIMING = ["contact", "scroll", "toggle", "drawer", "cv-scrollbar", "about-page"];
 
 const REPO_DIR = path.resolve(WEB_DIR, "..");
 const LOG_DIR = path.join(WEB_DIR, "test-results", "regression", "logs");

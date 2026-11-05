@@ -14,6 +14,9 @@ const WEB_DIR = path.resolve(__dirname, "../..");
 const APP_URL = `${trimSlash(process.env.APP_URL || "http://localhost:3000")}/`;
 const REFERENCE_URL = `${trimSlash(process.env.REFERENCE_URL || "http://localhost:4100")}/index.html`;
 const CHANNEL = process.env.PW_CHANNEL || "chrome";
+// Other pages: appPage("about") -> <app>/about, referencePage("about") -> <V21>/about.html.
+const appPage = (route) => `${trimSlash(APP_URL)}/${route}`;
+const referencePage = (name) => `${new URL(REFERENCE_URL).origin}/${name}.html`;
 
 // Comparison screenshots written by some suites (git-ignored via /test-results/).
 const SHOTS_DIR = path.join(WEB_DIR, "test-results", "regression", "screenshots");
@@ -68,4 +71,6 @@ module.exports = {
   APPROVED_CSS,
   launch,
   isReferenceFavicon,
+  appPage,
+  referencePage,
 };
