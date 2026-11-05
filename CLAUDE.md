@@ -158,6 +158,31 @@ intentional differences.
     `app.js` keeps the old text because `design-reference/` is read-only. The `contact` suite applies
     the correction to the V21 page before comparing, and checks that `web/src` has no "kiosk".
 
+**Phases 4–7: final delivery** (approved 2026-11-05)
+
+18. Wording. Home Selected work intro: "A look at my project work and professional experience."
+    Full-stack Applications card: "Explore my project work, including how it was designed, built and
+    tested." (still links to `/projects`). About journey intro: "A brief overview here; the Experience
+    page has the full timeline."
+19. Projects (`content/projects.ts`). Only Personal Portfolio is shown, as one full-width wide card
+    (`.bento-grid-single`). The case study has Overview, Architecture, Results and a link to the public
+    repository, and no screenshot panel until real screenshots exist. New labels use
+    `.page-section-label` (15px). Experience uses V21's text with AlphaSoft360, names as plain text.
+20. Contact and FAQ. No mail service or credentials exist, so the form validates and then opens the
+    visitor's own email app with a prefilled message; it never claims a message was sent. FAQ answers
+    that described the preview are reworded (`content/faq.ts`), and each answer is a named region.
+21. Phase 6 shell. A skip link is the first Tab stop (off-screen until focused; every `<main>` has
+    `id="main-content"`). Escape on the mobile drawer returns focus to the menu button. The pending
+    hero LinkedIn button is `aria-disabled`. Also added: custom 404 page, canonical and Open Graph
+    metadata (`pageMetadata` in `lib/site.ts`), sitemap, robots, Open Graph image, Person JSON-LD and
+    security headers. `src/proxy.ts` gives unknown project URLs a real 404 status, because the partially
+    prerendered case-study route has already started its response when `notFound()` runs (and
+    `dynamicParams` is unavailable with Cache Components). `NEXT_PUBLIC_SITE_URL` must be set on deployment; the fallback is localhost.
+
+`harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
+applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
+`display:none`, so tests after client-side navigation must target visible elements (`h1:visible`).
+
 How they are applied: label text, plus modifier classes (`.home-section-label`,
 `.photo-label-muted`) styled in `web/src/styles/approved-changes.css`, which loads after the
 legacy file. The label size is 15px. Plain `.eyebrow` elements elsewhere stay at 11px.
@@ -173,14 +198,19 @@ Read this first when resuming after a compaction or in a new session.
   `hero/InsideHero.tsx`, `ui/EmployerLink.tsx` and `content/experience.ts`. Final verification
   (2026-11-05): 898/898 regression checks, lint, typecheck, format, build, e2e and a production-mode
   `/about` smoke test all pass.
-- **Next:** Phase 4 (Projects, `/projects/[slug]`, Experience). Do not start it without approval.
-- **Regression totals:** 899 checks (`npm run test:regression`, about 37 min). `about-page` is 283. Run only the affected suites during a step
+- **Final delivery run (authorised 2026-11-05).** The user approved Phases 4B → 4E, 5, 6 and 7 as one
+  continuous run, with one final report and no per-step approvals. This replaces rule 2 for this run.
+  Commit, push, deploy, history rewrites and visibility changes still need explicit final approval.
+  Decisions: showcase only Personal Portfolio (full-width card; POS and SkillOrbit excluded); the repo
+  stays public; verified details only; plain-text employer names on the timeline; 15px main section
+  labels; the Full-stack Applications card stays on `/projects`; no kiosk information on public pages;
+  professional fallbacks when external details are missing; no paid services. Run targeted tests while
+  building and one full regression at the end.
+- **Regression totals:** 1,268 checks (`npm run test:regression`, about 55 min). `about-page` is 283, `pages` is 369. Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
-- **Unfinished destinations** (404 until built): `/projects`, `/experience` (Phase 4);
-  `/contact`, `/faq` (Phase 5).
-- **Proposed, not approved:** when Escape closes the mobile drawer, focus falls back to the page
-  `<body>` (as in V21). Returning it to the menu button is a candidate Phase 6 hardening item,
-  because it changes approved header behaviour.
+- **External details still needed:** CV PDF, photo, LinkedIn URL, WhatsApp number, mail provider and
+  `NEXT_PUBLIC_SITE_URL` (see README). Phases 4–7 are complete and pushed. Deploy only after the user
+  approves.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git

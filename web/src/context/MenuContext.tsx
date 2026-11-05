@@ -44,7 +44,10 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     if (openMenu === null) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenu();
+      if (event.key !== "Escape") return;
+      // Keyboard users continue from the button that opened the drawer.
+      document.querySelector<HTMLElement>('.hamburger[aria-expanded="true"]')?.focus();
+      closeMenu();
     };
     const onClick = (event: MouseEvent) => {
       const target = event.target as Element | null;

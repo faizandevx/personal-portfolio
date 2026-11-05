@@ -20,8 +20,9 @@ const REMOVED = [
   ".photo-sub",
   "#portraitImage",
 ];
-// Internal destinations allowed on the homepage (unfinished routes are listed in README.md).
+// Internal destinations allowed on the homepage.
 const ROUTES = [
+  "#main-content",
   "/",
   "/about",
   "/projects",

@@ -9,7 +9,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 // section, exactly as in the reference, and the sections follow in V21 order.
 export default function Home() {
   return (
-    <main>
+    <main id="main-content">
       <section className="hero-zone" data-header-hero id="hero">
         <SiteHeader variant="hero" />
         <HomeHero />

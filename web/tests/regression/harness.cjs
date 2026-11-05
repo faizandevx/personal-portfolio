@@ -47,6 +47,26 @@ async function launch(options = {}) {
             style.dataset.approvedChanges = "";
             style.textContent = css;
             document.head.appendChild(style);
+            // Approved site-wide changes in the markup (CLAUDE.md, changes 18-21).
+            const main = document.querySelector("main");
+            if (main) main.id = "main-content";
+            document.body.insertAdjacentHTML(
+              "afterbegin",
+              '<a class="skip-link" href="#main-content">Skip to main content</a>',
+            );
+            const pending = document.querySelector("#hero .hero-social-pending");
+            if (pending) pending.setAttribute("aria-disabled", "true");
+            const wording = {
+              "#home-work .section-intro": "A look at my project work and professional experience.",
+              "#home-work .bento-card.wide p":
+                "Explore my project work, including how it was designed, built and tested.",
+              "#journey .section-intro":
+                "A brief overview here; the Experience page has the full timeline.",
+            };
+            for (const [selector, text] of Object.entries(wording)) {
+              const element = document.querySelector(selector);
+              if (element) element.textContent = text;
+            }
           });
         },
         { origin: new URL(REFERENCE_URL).origin, css: APPROVED_CSS },

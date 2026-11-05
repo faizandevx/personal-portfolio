@@ -20,9 +20,9 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (899 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,268 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
-│  └─ .env.example     Reserved environment variables (none are used yet)
+│  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is used; the rest are reserved)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
 ├─ .gitattributes      LF line endings; design-reference/ is never converted
 ├─ .gitignore
@@ -58,10 +58,10 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 899 checks (about 37 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,268 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
-npm run test:regression:parallel          # same checks, up to 3 suites at once (estimated 25 min)
+npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
 ```
 
 ## Tech stack
@@ -77,30 +77,30 @@ npm run test:regression:parallel          # same checks, up to 3 suites at once 
 Rendering uses the default Next.js server build (not a static-only export), so server
 routes can be added later for the contact form and the AI assistant.
 
-## Routes (planned)
+## Routes
 
-| Route              | Source (design-reference)                |
-| ------------------ | ---------------------------------------- |
-| `/`                | index.html                               |
-| `/about`           | about.html                               |
-| `/projects`        | projects.html                            |
-| `/projects/[slug]` | project-detail.html (typed project data) |
-| `/experience`      | experience.html                          |
-| `/contact`         | contact.html                             |
-| `/faq`             | faq.html                                 |
+| Route              | Source (design-reference)                   |
+| ------------------ | ------------------------------------------- |
+| `/`                | index.html                                  |
+| `/about`           | about.html                                  |
+| `/projects`        | projects.html                               |
+| `/projects/[slug]` | project-detail.html (`content/projects.ts`) |
+| `/experience`      | experience.html                             |
+| `/contact`         | contact.html                                |
+| `/faq`             | faq.html                                    |
 
 ## Phase status
 
-| Phase | Scope                                                                        | Status                                                |
-| ----- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
-| 0     | Project initialisation, tooling, docs                                        | ✅ Complete (approved)                                |
-| 1     | Design system + shell (CSS, theme, header, footer, CV modal)                 | ✅ Complete (approved)                                |
-| 2     | Home page                                                                    | ✅ Complete (approved, pushed)                        |
-| 3     | About page                                                                   | ✅ Complete (approved, pushed)                        |
-| 4     | Projects, project detail, Experience                                         | Not started                                           |
-| 5     | Contact + FAQ                                                                | Not started                                           |
-| 6     | Hardening (performance, a11y, SEO, 404)                                      | Homepage accessibility done (pushed); rest later      |
-| 7     | Replace demo functionality (CV, LinkedIn, WhatsApp, contact backend, photos) | Not started, each item approved separately            |
+| Phase | Scope                                                        | Status                                             |
+| ----- | ------------------------------------------------------------ | -------------------------------------------------- |
+| 0     | Project initialisation, tooling, docs                        | ✅ Complete (approved)                             |
+| 1     | Design system + shell (CSS, theme, header, footer, CV modal) | ✅ Complete (approved)                             |
+| 2     | Home page                                                    | ✅ Complete (approved, pushed)                     |
+| 3     | About page                                                   | ✅ Complete (approved, pushed)                     |
+| 4     | Projects, project detail, Experience                         | ✅ Complete (approved, pushed)                     |
+| 5     | Contact + FAQ                                                | ✅ Complete (approved, pushed)                     |
+| 6     | Hardening (performance, a11y, SEO, 404)                      | ✅ Complete (approved, pushed)                     |
+| 7     | Integrations and production preparation                      | ✅ Feasible items done; see external details below |
 
 Each phase finishes with build, lint, typecheck and tests passing and a report, and the next phase waits for approval.
 
@@ -186,25 +186,39 @@ Phase 1 is complete and approved.
     `design-reference/` matching its V21 checksums. Lint, typecheck, format, build and the 2 e2e
     smoke tests also passed. A production-mode check of `/about` (`next start`, 3 widths) confirmed
     that it loads, both themes work, and there are no browser errors beyond the known 404s below.
-- Next: Phase 4 (Projects, project detail, Experience), after approval.
 
-## Not yet functional (by design)
+**Phases 4–7 (final delivery):**
 
-The site is still a scaffold. The CV download, WhatsApp chat, LinkedIn link,
-contact-form delivery and AI assistant are not connected. They will never be shown as
-working until they really are.
+- **Projects:** `/projects` shows one full-width card for Personal Portfolio, and
+  `/projects/personal-portfolio` is its case study, linking to the public repository. Project details
+  come from `content/projects.ts` and are verified against this repository.
+- **Experience:** `/experience` is the V21 timeline with AlphaSoft360 and Aman Bank as plain text, plus
+  the CV button.
+- **Contact:** the form validates and then opens the visitor's own email app with a prefilled message.
+  No message passes through this site, and nothing is stored. Email is the working contact method.
+- **FAQ:** the V21 single-open accordion, keyboard accessible, with visitor-facing answers.
+- **Production:** skip link, drawer focus return, custom 404 page (`src/proxy.ts` gives unknown project
+  URLs a real 404 status), canonical and Open Graph metadata,
+  sitemap, robots, Open Graph image, Person structured data and security headers.
 
-### Links to pages not built yet
+## Before and after deployment
 
-`/` and `/about` exist so far (all About sections are migrated). These links already use their final routes and show a 404
-until the page is migrated:
+Set `NEXT_PUBLIC_SITE_URL` to the public address when deploying. Without it, canonical links, the
+sitemap and robots.txt point to `http://localhost:3000`.
 
-| Route         | Linked from                                                                                                                                                             | Arrives in |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `/projects`   | Header, footer, "All projects", "Featured case study" card (moves to a `/projects/[slug]` case study later), About hero "Explore my work", About CTA "Explore projects" | Phase 4    |
-| `/experience` | Header, footer, "Digital banking" card, About "View my professional experience" and "Full experience"                                                                   | Phase 4    |
-| `/contact`    | Header, footer, Contact "Send a Message", Ask Faizan AI "Contact Faizan", About CTA "Get in touch"                                                                      | Phase 5    |
-| `/faq`        | Header, footer                                                                                                                                                          | Phase 5    |
+## Not connected yet (by design)
+
+These need details only the site owner can supply. Each one is labelled honestly on the site, and none
+is ever shown as working:
+
+| Item                | Current behaviour                                    | Needed                      |
+| ------------------- | ---------------------------------------------------- | --------------------------- |
+| CV download         | Modal says the CV isn't available yet                | The final CV PDF            |
+| Professional photo  | Frame with "Professional photo coming soon"          | The photo                   |
+| LinkedIn            | Marked as coming soon; not a link                    | The profile URL             |
+| WhatsApp            | Modal says chat isn't available yet; no number shown | A public number             |
+| Direct form sending | Form opens the visitor's email app instead           | A mail provider and API key |
+| Ask Faizan AI       | Labelled scripted demo with pre-written answers      | An AI provider, if wanted   |
 
 ### Accessibility (Phase 6)
 
@@ -222,4 +236,4 @@ both themes:
   the visible text (WCAG 2.5.3).
 - **Favicon:** `src/app/icon.svg`, the FA brand icon, so there is no more `/favicon.ico` 404.
 
-No known minor issues remain on the homepage.
+All pages require zero axe violations (WCAG 2.1 A/AA) at the tested widths in both themes.

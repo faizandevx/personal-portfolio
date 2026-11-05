@@ -15,8 +15,7 @@ export default function JourneySection() {
               Where I&apos;ve <span className="accent">grown.</span>
             </h2>
             <p className="section-intro">
-              A brief overview here; the Experience page covers responsibilities and project
-              details.
+              A brief overview here; the Experience page has the full timeline.
             </p>
           </div>
           <Link className="about-v18-text-link" href="/experience">

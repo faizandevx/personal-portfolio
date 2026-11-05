@@ -530,7 +530,8 @@ async function pixelDiff(b, pngA, pngB) {
       l.links.join(", "),
     );
     const before = q.url();
-    await q.click("#hero .hero-social-pending");
+    // force: Playwright refuses to click aria-disabled controls, but a visitor still can.
+    await q.click("#hero .hero-social-pending", { force: true });
     await q.waitForTimeout(200);
     check(
       "clicking LinkedIn does nothing (no navigation, no errors)",

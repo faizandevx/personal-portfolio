@@ -60,6 +60,7 @@ export default function HomeHero() {
               className="hero-social-link hero-social-pending"
               title="LinkedIn profile link coming soon"
               aria-label="LinkedIn profile link pending"
+              aria-disabled="true"
             >
               <svg
                 viewBox="0 0 24 24"

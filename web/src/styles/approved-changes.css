@@ -11,9 +11,50 @@
  * (e.g. "Featured case study", the CV modal) are unchanged.
  */
 .eyebrow.home-section-label,
-.eyebrow.about-section-label {
-  /* Phase 3: the About page's numbered section labels use the same size. */
+.eyebrow.about-section-label,
+.eyebrow.page-section-label {
+  /* Phases 3-5: the About and other inner-page main labels use the same size. */
   font-size: 15px;
+}
+
+/*
+ * Phase 4: with a single showcased project, the V21 wide card spans the full
+ * grid (V21's two columns are for three cards).
+ */
+.bento-grid.bento-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Phase 4: the case-study buttons (V21 has one button, spaced by .mini-preview). */
+.project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/*
+ * Phase 6: keyboard users can jump past the navigation. Off-screen until it
+ * receives keyboard focus, so it adds nothing to the visible design.
+ */
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 650;
+  transform: translateY(-200%);
+  transition: none;
+}
+.skip-link:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+  transform: none;
 }
 
 /*

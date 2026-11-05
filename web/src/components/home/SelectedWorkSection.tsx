@@ -2,8 +2,8 @@ import Link from "next/link";
 
 // The V21 home "Selected work" section (design-reference/index.html, #home-work).
 // Approved Phase 2 change: the label has no "02 /" prefix and uses the larger
-// home-section-label size. Links use the final routes; the featured card goes
-// to the Projects page until the project case studies are migrated.
+// home-section-label size. Links use the final routes. Approved Phase 4 wording
+// replaces the intro and featured-card text that described the design preview.
 export default function SelectedWorkSection() {
   return (
     <section className="section" id="home-work">
@@ -12,9 +12,7 @@ export default function SelectedWorkSection() {
           <div>
             <div className="eyebrow home-section-label">Selected work</div>
             <h2>Built with intent.</h2>
-            <p className="section-intro">
-              A preview of the projects section. Each project will have its own detailed case study.
-            </p>
+            <p className="section-intro">A look at my project work and professional experience.</p>
           </div>
           <Link href="/projects" className="link-inline">
             All projects ↗
@@ -25,9 +23,7 @@ export default function SelectedWorkSection() {
             <div className="card-icon">⌘</div>
             <div className="eyebrow">Featured case study</div>
             <h3>Full-stack applications</h3>
-            <p>
-              Project architecture, screenshots, responsibilities and results — presented clearly.
-            </p>
+            <p>Explore my project work, including how it was designed, built and tested.</p>
             <div className="card-illustration" aria-hidden="true">
               ⌘
             </div>

@@ -10,16 +10,16 @@ documented tolerances), hover states, animations, keyboard use, focus handling, 
 
 ```bash
 cd web
-npm run test:regression                    # all suites, one at a time (about 37 minutes)
+npm run test:regression                    # all suites, one at a time (about 55 minutes)
 npm run test:regression -- hero contact    # selected suites
 npm run test:regression:list               # suites and expected check counts
-npm run test:regression:parallel           # up to 3 suites at once (same checks, estimated 25 minutes)
+npm run test:regression:parallel           # up to 3 suites at once (same checks, faster)
 npm run test:regression -- --jobs 2        # choose the number of parallel suites
 ```
 
 `--jobs` runs only the suites that compare layout, styles, pixels, links and focus in
 parallel. The suites whose checks measure timing still run one at a time, after the others:
-`contact`, `scroll`, `toggle`, `drawer`, `cv-scrollbar` and `about-page`. They check animation replay,
+`contact`, `scroll`, `toggle`, `drawer`, `cv-scrollbar`, `about-page` and `pages`. They check animation replay,
 scroll damping, transitions and real scrollbars. Coverage and tolerances are the same in
 both modes.
 
@@ -79,6 +79,11 @@ comparing.
 | `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                  |
 | `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                              |
 | `about-page`    |    283 | 3: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
+| `pages`         |    369 | 4–6: `/projects`, case study, `/experience`, `/contact` (form, email), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                                        |
+
+`pages` covers `/projects`, the case study, `/experience`, `/contact` and `/faq` at 8 widths in both
+themes, plus the skip link, 404 page, SEO files, security headers and client-side navigation. Use
+`PAGES=faq,site node tests/regression/pages.regression.cjs` to run part of it while developing.
 
 The first 11 suites are the 563 checks built during Phases 1–2D, plus 1 for the approved kiosk
 content correction (564). `homepage` was added in

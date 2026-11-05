@@ -1308,7 +1308,7 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
     }
     const s = states.app;
     check(
-      "@390: mobile drawer by keyboard - Enter opens it, Tab reaches its links, Escape closes it (focus returns to the page, as in V21); same states as V21",
+      "@390: mobile drawer by keyboard - Enter opens it, Tab reaches its links, Escape closes it; same states as V21, except that focus returns to the menu button (approved change)",
       s.opened.open &&
         s.opened.expanded === "true" &&
         s.opened.menuOpen &&
@@ -1316,7 +1316,10 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
         !s.closed.open &&
         s.closed.expanded === "false" &&
         !s.closed.menuOpen &&
-        JSON.stringify(states.app) === JSON.stringify(states.ref),
+        s.closed.focus === "" &&
+        states.ref.closed.focus === "body" &&
+        JSON.stringify({ ...states.app, closed: { ...s.closed, focus: "body" } }) ===
+          JSON.stringify(states.ref),
       `app ${JSON.stringify(states.app)} V21 ${JSON.stringify(states.ref)}`,
     );
   }
@@ -1388,19 +1391,20 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
     }
     await q.context().close();
     const expected = [
+      "#main-content 200 #main-content:true",
       "/ 200",
       "/about 200",
-      "/projects 404",
-      "/experience 404",
-      "/contact 404",
-      "/faq 404",
+      "/projects 200",
+      "/experience 200",
+      "/contact 200",
+      "/faq 200",
       "#cv-preview cv-trigger:true",
       "#my-story 200 #my-story:true",
       "/#home-skills 200 #home-skills:true",
       "/about#education 200 #education:true",
     ];
     check(
-      "routes: /, /about and every anchor work; /projects, /experience (Phase 4), /contact, /faq (Phase 5) are the only unfinished destinations",
+      "routes: every page and anchor the About page links to works",
       JSON.stringify(res) === JSON.stringify(expected),
       res.join(" | "),
     );
