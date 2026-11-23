@@ -1,4 +1,11 @@
-const { launch, APP_URL, REFERENCE_URL, SHOTS_DIR, isReferenceFavicon } = require("./harness.cjs");
+const {
+  launch,
+  APP_URL,
+  REFERENCE_URL,
+  SHOTS_DIR,
+  WEB_DIR,
+  isReferenceFavicon,
+} = require("./harness.cjs");
 const APP = APP_URL,
   REF = REFERENCE_URL;
 const SHOTS = SHOTS_DIR;
@@ -84,7 +91,7 @@ const toBottom = (p) =>
     const s = await state(p);
     check(
       t.name,
-      s.open && s.shown && s.focus === "Understood ✓" && s.url === url && !s.menuOpen,
+      s.open && s.shown && s.focus === "Download PDF ↓" && s.url === url && !s.menuOpen,
       `open=${s.open} focus="${s.focus}" urlUnchanged=${s.url === url}${t.menu ? " drawerClosed=" + !s.menuOpen : ""}`,
     );
     await p.keyboard.press("Escape");
@@ -117,10 +124,7 @@ const toBottom = (p) =>
   });
   check(
     "dialog semantics: role=dialog, aria-modal, named by its heading, described by its text",
-    dlg.role === "dialog" &&
-      dlg.modal === "true" &&
-      dlg.name === "Download CV (coming soon)" &&
-      !!dlg.desc,
+    dlg.role === "dialog" && dlg.modal === "true" && dlg.name === "Download CV (PDF)" && !!dlg.desc,
     JSON.stringify(dlg),
   );
   check("CV buttons announce that they open a dialog (aria-haspopup)", dlg.haspopup === "dialog");
@@ -195,31 +199,55 @@ const toBottom = (p) =>
   await p.waitForTimeout(200);
   await p.click("#cvModal [data-close-cv]");
   await p.waitForTimeout(250);
-  check("'Understood ✓' button closes it", !(await state(p)).open);
+  check("'Close' button closes it", !(await state(p)).open);
   await p.keyboard.press("Tab");
   await p.keyboard.press("Shift+Tab");
   await p.keyboard.press("Enter");
   await p.waitForTimeout(250);
   check("keyboard only: focus the CV button + Enter opens the modal", (await state(p)).open);
+  // Focus starts on "Download PDF"; Shift+Tab reaches "Close".
+  await p.keyboard.press("Shift+Tab");
   await p.keyboard.press("Enter");
   await p.waitForTimeout(250);
-  check("keyboard only: Enter on the focused 'Understood ✓' closes it", !(await state(p)).open);
+  check("keyboard only: Shift+Tab to 'Close' and Enter closes it", !(await state(p)).open);
 
-  console.log("\n=== 3. Honest content: no download, no review wording ===");
+  // Approved 2026-11-23: the final CV is available (CLAUDE.md, change 24).
+  console.log("\n=== 3. CV download: the original PDF, no review wording ===");
   const c = await p.evaluate(() => {
     const m = document.getElementById("cvModal");
     return {
-      links: [...m.querySelectorAll("a")].length,
-      download: !!m.querySelector("[download]"),
-      pdf: /\.pdf/i.test(m.innerHTML),
+      links: [...m.querySelectorAll("a")].map(
+        (a) => `${a.getAttribute("href")} ${a.getAttribute("download")} ${a.type}`,
+      ),
       text: m.innerText,
     };
   });
   check(
-    "no download link, no download attribute, no .pdf reference",
-    c.links === 0 && !c.download && !c.pdf,
+    "one download link: the CV PDF, saved as Faizan-Ali-CV.pdf",
+    c.links.join() === "/cv/Faizan_CV.pdf Faizan-Ali-CV.pdf application/pdf" &&
+      !/not available|coming soon/i.test(c.text),
+    c.links.join(),
   );
-  check("says clearly the CV is not available yet", /not available to download yet/.test(c.text));
+  {
+    const original = require("node:fs").readFileSync(
+      require("node:path").join(WEB_DIR, "public", "cv", "Faizan_CV.pdf"),
+    );
+    await p.click(".floating-header .cv-btn");
+    await p.waitForTimeout(250);
+    const [download] = await Promise.all([
+      p.waitForEvent("download"),
+      p.click("#cvModal [data-cv-download]"),
+    ]);
+    const file = require("node:fs").readFileSync(await download.path());
+    await p.waitForTimeout(250);
+    check(
+      "'Download PDF' downloads the original PDF byte for byte, then the modal closes",
+      download.suggestedFilename() === "Faizan-Ali-CV.pdf" &&
+        file.equals(original) &&
+        !(await state(p)).open,
+      `${download.suggestedFilename()} ${file.length} bytes (original ${original.length})`,
+    );
+  }
   check(
     "no design-preview wording",
     !/preview|design demo|supply the final|final website/i.test(c.text),
@@ -237,7 +265,8 @@ const toBottom = (p) =>
     "#cvModal h2 .accent",
     "#cvModal p",
     "#cvModal .modal-actions",
-    "#cvModal [data-close-cv]",
+    // V21's only button ("Understood ✓"); in the app, "Download PDF".
+    "#cvModal .modal-actions .btn-primary",
   ];
   const PROPS = [
     "display",
@@ -284,7 +313,9 @@ const toBottom = (p) =>
         );
         res[k + "Box"] = await q.evaluate(() => {
           const m = document.querySelector("#cvModal .modal").getBoundingClientRect();
-          const btn = document.querySelector("#cvModal [data-close-cv]").getBoundingClientRect();
+          const btn = document
+            .querySelector("#cvModal .modal-actions .btn-primary")
+            .getBoundingClientRect();
           return {
             cardX: Math.round(m.x),
             cardW: Math.round(m.width),
@@ -307,10 +338,10 @@ const toBottom = (p) =>
         .filter(Boolean);
       const rb = res.refBox,
         ab = res.appBox;
+      // The button text changed on purpose ("Download PDF ↓"), so only its width may differ.
       const sameBox =
         rb.cardX === ab.cardX &&
         rb.cardW === ab.cardW &&
-        rb.btnW === ab.btnW &&
         rb.btnH === ab.btnH &&
         rb.btnRightGap === ab.btnRightGap &&
         Math.abs(rb.cardCentreY - ab.cardCentreY) <= 1;
@@ -320,7 +351,7 @@ const toBottom = (p) =>
         diffs.slice(0, 2).join(""),
       );
       check(
-        `${theme} @${width}px: card position/width, centring, button size + alignment`,
+        `${theme} @${width}px: card position/width, centring, primary button height + alignment`,
         sameBox,
         `V21 ${JSON.stringify(rb)} app ${JSON.stringify(ab)}`,
       );

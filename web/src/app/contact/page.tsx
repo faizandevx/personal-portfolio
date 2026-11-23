@@ -15,8 +15,11 @@ export default function ContactPage() {
     <main id="main-content">
       <InsideHero>
         <div className="container">
-          <div className="eyebrow page-section-label">
-            LET&apos;S CONNECT <span className="eyebrow-line"></span> OPEN TO OPPORTUNITIES
+          {/* The two phrases never break mid-phrase; on phones they stack (approved-changes.css). */}
+          <div className="eyebrow page-section-label contact-hero-label">
+            <span className="eyebrow-phrase">LET&apos;S CONNECT</span>{" "}
+            <span className="eyebrow-line"></span>{" "}
+            <span className="eyebrow-phrase">OPEN TO OPPORTUNITIES</span>
           </div>
           <h1>
             Let&apos;s make something <span className="accent">meaningful.</span>

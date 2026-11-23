@@ -539,49 +539,37 @@ const fmt = (d) =>
     await q.context().close();
   }
 
-  console.log("\n=== 7. Hero photo label (approved: smaller, muted) ===");
+  // Change 25 replaced the approved "coming soon" label (change 5) with the photo.
+  console.log("\n=== 7. Hero photo (approved: fills the V21 frame, no caption) ===");
   for (const theme of ["dark", "light"])
     for (const width of [1440, 768, 620, 390]) {
       const ref = await open(b, REF, { width, theme }),
         app = await open(b, APP, { width, theme });
       const g = (p) =>
         p.evaluate(() => {
-          const l = document.querySelector("#hero .photo-label"),
-            c = getComputedStyle(l),
-            lr = l.getBoundingClientRect();
           const box = (s) => {
             const r = document.querySelector(s).getBoundingClientRect();
             return [r.x, r.y, r.width, r.height].map(Math.round).join(",");
           };
-          const av = document.querySelector("#hero .avatar-circle"),
-            ac = getComputedStyle(av);
+          const frame = getComputedStyle(document.querySelector("#hero .hero-photo"));
+          const panel = getComputedStyle(document.querySelector("#hero .photo-panel"));
           return {
-            size: c.fontSize,
-            weight: c.fontWeight,
-            color: c.color,
-            muted: getComputedStyle(document.querySelector("#hero .lead")).color,
-            margin: c.margin,
-            fits: lr.width <= l.parentElement.clientWidth,
             frame: box("#hero .hero-photo"),
             panel: box("#hero .photo-panel"),
-            avatarSize: `${Math.round(av.getBoundingClientRect().width)} ${ac.borderTopStyle} ${ac.borderTopColor}`,
-            avatarX: Math.round(av.getBoundingClientRect().x),
+            photo: box("#hero .photo-panel > img"),
+            border: `${frame.backgroundImage} ${frame.padding} ${panel.borderRadius}`,
+            caption: !!document.querySelector("#hero .photo-label, #hero .avatar-circle"),
           };
         });
       const [r, a] = [await g(ref), await g(app)];
-      const want = width <= 620 ? "13px" : "14px";
       check(
-        `${theme} @${width}: label ${a.size} (V21 ${r.size}), weight ${a.weight}, muted colour, V21 spacing; frame, panel and avatar outline unchanged`,
-        a.size === want &&
-          a.weight === "600" &&
-          a.color === a.muted &&
-          a.margin === r.margin &&
-          a.fits &&
-          a.frame === r.frame &&
+        `${theme} @${width}: photo fills the frame; V21 gradient border, padding and corners; no caption or avatar outline`,
+        a.frame === r.frame &&
           a.panel === r.panel &&
-          a.avatarSize === r.avatarSize &&
-          a.avatarX === r.avatarX,
-        `app ${JSON.stringify(a)}`,
+          a.photo === a.panel &&
+          a.border === r.border &&
+          !a.caption,
+        `app ${JSON.stringify(a)} V21 ${JSON.stringify(r)}`,
       );
       await ref.context().close();
       await app.context().close();

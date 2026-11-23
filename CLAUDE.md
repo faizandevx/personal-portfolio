@@ -78,7 +78,8 @@ intentional differences.
    unchanged.
 4. Housekeeping (not a design change): remove the TEMPORARY scroll-test spacer `<section>` in
    `web/src/app/page.tsx` that was added in Phase 1 Step F. (Done in Step 2B.)
-5. Hero photo panel (approved 2026-11-03). Keep the V21 frame and avatar outline. Remove the
+5. Hero photo panel (approved 2026-11-03; the label was replaced by the photo in change 25).
+   Keep the V21 frame and avatar outline. Remove the
    upload control, the instructions and the "Photo-ready hero" tag. Show only the label
    "Professional photo coming soon", slightly smaller and muted (14px, or 13px at ≤620px; weight
    600; `--muted`).
@@ -179,6 +180,53 @@ intentional differences.
     prerendered case-study route has already started its response when `notFound()` runs (and
     `dynamicParams` is unavailable with Cache Components). `NEXT_PUBLIC_SITE_URL` must be set on deployment; the fallback is localhost.
 
+**Final pre-deployment improvements** (approved 2026-11-23)
+
+22. Contact hero label. "LET'S CONNECT — OPEN TO OPPORTUNITIES" needs 435px on one line. Each
+    phrase is now a nowrap `.eyebrow-phrase` inside `.contact-hero-label`. At 480px and below,
+    the phrases stack on two lines without the divider; V21 broke "OPEN TO / OPPORTUNITIES".
+23. 404 on tall screens. The hero grows so the footer reaches the bottom of the window. It is
+    scoped with `body:has(> main.not-found-main:not([style*="display: none"]))`, because a hidden
+    404 stays in the DOM after client-side navigation.
+24. CV download (approved 2026-11-23). The user's original PDF is `web/public/cv/Faizan_CV.pdf`
+    (one page, 69,075 bytes, SHA-256 `d90f308d…`). Never edit or replace it. `CV_FILE` in
+    `lib/site.ts` points to it.
+    - Every CV button (navbar, floating navbar, hero, mobile drawer, Experience) opens the V21 CV
+      modal, which now reads "Download CV (PDF)".
+    - The modal has a secondary "Close" button and a primary "Download PDF" link on the right,
+      where V21's button was. The link downloads the file as `Faizan-Ali-CV.pdf`. Focus starts on
+      it, and the modal closes as the download starts.
+    - FAQ #5 now explains where to download the CV.
+    - WhatsApp stays inactive until a verified number is supplied.
+25. Professional photos (approved 2026-11-23). They are the user's own unedited files in
+    `web/public/images/`: `faizan-ali-hero.png` (blue suit, 1070×1470) and
+    `faizan-ali-about.png` (grey suit, 1122×1402). They are set in `content/photos.ts` and
+    rendered by `ui/ProfileImage` (`next/image`, `object-fit: cover`). Never edit, regenerate or
+    replace them.
+    - Home hero: the photo fills the V21 frame. The gradient border, padding and 23px corners
+      stay. It has no caption and no avatar outline, so it replaces change 5's label. The panel
+      is 4:5 (`.photo-panel-filled`): about 450px tall on desktop, as in V21, and 418px instead
+      of 350px at ≤620px. The photo is cropped from the bottom (`object-position: 50% 0%`) and
+      loads eagerly with high priority.
+    - About: a 4:3 photo in the "At a glance" card, between its label row and its heading
+      (`.about-glance-photo`, 18px corners, no border, glow or added background). It loads
+      lazily. The card's content and the hero workflow card are unchanged. On wide screens the
+      card is taller than the story column; V21's card was already 63px taller.
+    - Tests: `harness.cjs` adds an empty photo element with the same markup to the V21 pages.
+      Pixel comparisons mask the photo (`#hero .photo-panel`, `.about-glance-photo`), and
+      separate checks verify it.
+
+26. LinkedIn (confirmed by the user on 2026-11-24): `https://www.linkedin.com/in/faizan-ali-5aa430380`
+    (`LINKEDIN_PROFILE_URL` in `lib/site.ts`, the URL on the CV). V21's pending items become links
+    like GitHub's, opening in a new tab with `rel="noopener noreferrer"`. This replaces the pending
+    LinkedIn parts of changes 9 and 21.
+    - The hero icon and the footer icon are links at full opacity, with no pending classes.
+    - The Contact "Professional network" card is a link like the email card (`↗` arrow, and a hidden
+      "(opens in a new tab)").
+    - Person JSON-LD `sameAs` lists GitHub and LinkedIn.
+    - `harness.cjs` applies the same markup to the V21 pages. AlphaSoft360's dates stay as on the
+      site (Mar 2025), by the user's choice.
+
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
 `display:none`, so tests after client-side navigation must target visible elements (`h1:visible`).
@@ -206,9 +254,12 @@ Read this first when resuming after a compaction or in a new session.
   labels; the Full-stack Applications card stays on `/projects`; no kiosk information on public pages;
   professional fallbacks when external details are missing; no paid services. Run targeted tests while
   building and one full regression at the end.
-- **Regression totals:** 1,268 checks (`npm run test:regression`, about 55 min). `about-page` is 283, `pages` is 369. Run only the affected suites during a step
+- **Final pre-deployment improvements (started 2026-11-23):** Contact label and 404 fixes, the CV
+  download, both professional photos and LinkedIn (changes 22–26). The full regression run waits until the
+  final assets are integrated. Commit, push and deploy still need explicit approval.
+- **Regression totals:** 1,271 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 371. Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
-- **External details still needed:** CV PDF, photo, LinkedIn URL, WhatsApp number, mail provider and
+- **External details still needed:** WhatsApp number, mail provider and
   `NEXT_PUBLIC_SITE_URL` (see README). Phases 4–7 are complete and pushed. Deploy only after the user
   approves.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.

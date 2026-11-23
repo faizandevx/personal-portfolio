@@ -33,6 +33,8 @@ const ROUTES = [
   "/about#education",
   "#home-about",
   "#cv-preview",
+  // The CV PDF, linked from the CV modal (change 24).
+  "/cv/Faizan_CV.pdf",
 ];
 const V21_ROUTE = {
   "index.html": "/",
@@ -80,7 +82,9 @@ async function open(b, url, o = {}) {
         a.setAttribute("aria-label", "FA Faizan Ali, go to homepage");
         a.querySelector(".brand-icon").after(" ");
       });
-      document.querySelector(".footer-reference-icon-pending")?.setAttribute("role", "img");
+      // Approved 2026-11-23 (change 24): the CV modal's "Close" and "Download PDF".
+      document.querySelector("#cvModal .modal-actions").innerHTML =
+        '<button class="btn btn-secondary" type="button" data-close-cv="">Close</button><a class="btn btn-primary" href="/cv/Faizan_CV.pdf" download="Faizan-Ali-CV.pdf" type="application/pdf" data-cv-download="">Download PDF <span aria-hidden="true">↓</span></a>';
     });
   await p.waitForTimeout(300);
   return p;
@@ -171,10 +175,11 @@ async function open(b, url, o = {}) {
       external.map((l) => l.href).join(", "),
     );
     check(
-      "only approved external sites (GitHub profile, AlphaSoft360, Aman Bank)",
+      "only approved external sites (GitHub and LinkedIn profiles, AlphaSoft360, Aman Bank)",
       external.every((l) =>
         [
           "https://github.com/faizandevx",
+          "https://www.linkedin.com/in/faizan-ali-5aa430380",
           "https://www.alphasoft360.com/",
           "https://www.aman-bank.com/",
         ].includes(l.href),
@@ -515,7 +520,9 @@ async function open(b, url, o = {}) {
         dots: [".orange-dot", ".caption-dot", ".tech-v16-live-dot", ".mini-ai-footer-dot"]
           .map((s) => getComputedStyle(document.querySelector(s)).backgroundColor)
           .join(" "),
-        avatar: getComputedStyle(document.querySelector(".avatar-circle svg")).stroke,
+        // The avatar outline was replaced by the photo (change 25); the footer's
+        // country dot is the remaining decorative orange outside the dots above.
+        country: getComputedStyle(document.querySelector(".country-indicator")).backgroundColor,
         underline: getComputedStyle(
           document.querySelector(".nav-links a.current .nav-label") ||
             document.querySelector(".nav-links a"),
@@ -532,9 +539,9 @@ async function open(b, url, o = {}) {
       await tokens(REF, "dark", true),
     ];
     check(
-      "light theme: decorative orange (dots, avatar outline, nav underline) keeps V21's #f97338; only text darkens",
+      "light theme: decorative orange (dots, country dot, nav underline) keeps V21's #f97338; only text darkens",
       appLight.dots === v21Light.dots &&
-        appLight.avatar === v21Light.avatar &&
+        appLight.country === v21Light.country &&
         appLight.underline === v21Light.underline &&
         appLight.text === "rgb(184, 70, 4)",
       `app ${JSON.stringify(appLight)} V21 ${JSON.stringify(v21Light)}`,
@@ -571,25 +578,24 @@ async function open(b, url, o = {}) {
         failed.length === 0,
       `${JSON.stringify(icons)} ${failed.join(", ")}`,
     );
+    // Change 26 (2026-11-24) replaced the pending icon (change 9) with the confirmed link.
     const li = await q.evaluate(() => {
-      const e = document.querySelector(".footer-reference-icon-pending");
+      const e = document.querySelector('footer a[href*="linkedin"]');
       return {
-        role: e.getAttribute("role"),
         label: e.getAttribute("aria-label"),
         focusable: e.tabIndex >= 0,
-        link: e.closest("a") !== null || e.hasAttribute("href"),
         svgHidden: e.querySelector("svg").getAttribute("aria-hidden"),
+        pending: !!document.querySelector("[class*='pending']"),
       };
     });
     const tree = await q.locator("footer").ariaSnapshot();
     check(
-      "footer LinkedIn (pending): a labelled image (role=img), SVG hidden, not focusable, not a link",
-      li.role === "img" &&
-        li.label === "LinkedIn profile link will be added after confirmation" &&
+      "footer LinkedIn: a labelled, focusable link with its SVG hidden; nothing pending on the page",
+      li.label === "LinkedIn profile" &&
         li.svgHidden === "true" &&
-        !li.focusable &&
-        !li.link &&
-        /img "LinkedIn profile link will be added after confirmation"/.test(tree),
+        li.focusable &&
+        !li.pending &&
+        /link "LinkedIn profile"/.test(tree),
       JSON.stringify(li),
     );
     const brand = await q.evaluate(() =>

@@ -210,3 +210,77 @@ html[data-theme="light"] .footer-timezone {
     align-self: center;
   }
 }
+
+/*
+ * Pre-deployment UI fix (approved 2026-11-23): the Contact hero label
+ * "LET'S CONNECT — OPEN TO OPPORTUNITIES" needs 435px on one line at 15px. Narrower
+ * screens broke it mid-phrase ("OPEN TO / OPPORTUNITIES"). Each phrase now stays
+ * whole, and below 481px the phrases stack on two lines without the divider.
+ */
+.contact-hero-label .eyebrow-phrase {
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .contact-hero-label .eyebrow-line {
+    display: none;
+  }
+  .contact-hero-label .eyebrow-phrase {
+    display: block;
+  }
+}
+
+/*
+ * Pre-deployment UI fix (approved 2026-11-23): on screens taller than the 404 page,
+ * the hero grows so the footer sits at the bottom of the window instead of leaving
+ * empty page background below it. The hero keeps its V21 vertical centring. A 404
+ * that is still in the DOM but hidden after client-side navigation
+ * (display: none) does not change the layout of other pages.
+ */
+body:has(> main.not-found-main:not([style*="display: none"])) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+main.not-found-main {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+main.not-found-main > .not-found-hero {
+  flex: 1 0 auto;
+}
+
+/*
+ * Professional photos (approved 2026-11-23, content/photos.ts). The photos are never
+ * stretched (object-fit: cover) and are cropped from the bottom, so the face, hair and
+ * glasses always stay in view.
+ * - Home hero: the photo fills the V21 frame (gradient border and 23px corners). With
+ *   no avatar or caption inside, the panel keeps a 4:5 portrait shape at every width
+ *   (450px tall at desktop as in V21; at <=620px 418px instead of 350px).
+ * - About "At a glance": a 4:3 photo between the card's label row and its heading,
+ *   with the card's own corner style. No border, glow or added background.
+ */
+.photo-panel.photo-panel-filled {
+  min-height: 0;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+}
+.photo-panel-filled::before {
+  display: none;
+}
+.photo-panel-filled img.profile-photo {
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+.about-glance-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin-top: 19px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--panel2);
+}
+.about-glance-photo img.profile-photo {
+  object-fit: cover;
+  object-position: 50% 6%;
+}

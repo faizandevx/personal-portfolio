@@ -257,7 +257,9 @@ const NO_HEADERS = ".hero-header,.floating-header{visibility:hidden!important}";
       company: [...document.querySelectorAll("#home-about .about-company-link")]
         .map((a) => `${a.childNodes[0].textContent} ${a.href}`)
         .join(" | "),
-      heroLabel: document.querySelector("#hero .photo-label").textContent,
+      heroPhoto:
+        !!document.querySelector("#hero .photo-panel > img.profile-photo") &&
+        !document.querySelector("#hero .photo-label"),
     }));
     check(
       "labels read SELECTED WORK and EXPERTISE (no numbers)",
@@ -287,10 +289,10 @@ const NO_HEADERS = ".hero-header,.floating-header{visibility:hidden!important}";
       info.links.join(" | "),
     );
     check(
-      "earlier work intact: AlphaSoft360 + Aman Bank links, hero photo label",
+      "earlier work intact: AlphaSoft360 + Aman Bank links, hero photo without a caption",
       info.company ===
         "AlphaSoft360 https://www.alphasoft360.com/ | Aman Bank https://www.aman-bank.com/" &&
-        info.heroLabel === "Professional photo coming soon",
+        info.heroPhoto,
       info.company,
     );
     check("no console errors or hydration warnings", app.errs.length === 0, app.errs.join(" | "));

@@ -54,8 +54,33 @@ async function launch(options = {}) {
               "afterbegin",
               '<a class="skip-link" href="#main-content">Skip to main content</a>',
             );
-            const pending = document.querySelector("#hero .hero-social-pending");
-            if (pending) pending.setAttribute("aria-disabled", "true");
+            // Approved 2026-11-24 (CLAUDE.md, change 26): the confirmed LinkedIn profile is
+            // a link like GitHub's, in the hero and the footer.
+            const linkedIn = (element, attributes) => {
+              if (!element) return;
+              const link = document.createElement("a");
+              for (const [name, value] of Object.entries(attributes))
+                link.setAttribute(name, value);
+              link.innerHTML = element.innerHTML;
+              element.replaceWith(link);
+            };
+            const profile = "https://www.linkedin.com/in/faizan-ali-5aa430380";
+            linkedIn(document.querySelector("#hero .hero-social-pending"), {
+              class: "hero-social-link",
+              href: profile,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              title: "LinkedIn — Faizan Ali",
+              "aria-label": "Visit Faizan Ali on LinkedIn",
+            });
+            linkedIn(document.querySelector(".footer-reference-icon-pending"), {
+              class: "footer-reference-icon",
+              href: profile,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              "aria-label": "LinkedIn profile",
+              title: "LinkedIn",
+            });
             const wording = {
               "#home-work .section-intro": "A look at my project work and professional experience.",
               "#home-work .bento-card.wide p":
@@ -67,6 +92,19 @@ async function launch(options = {}) {
               const element = document.querySelector(selector);
               if (element) element.textContent = text;
             }
+            // Approved professional photos (CLAUDE.md, change 25). V21 has none, so it gets
+            // an empty photo element with the app's markup and size; the suites mask the
+            // photo itself in pixel comparisons and check it separately.
+            const photo =
+              '<img alt="" class="profile-photo" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent">';
+            const panel = document.querySelector("#hero .photo-panel");
+            if (panel) {
+              panel.className = "photo-panel photo-panel-filled";
+              panel.innerHTML = photo;
+            }
+            document
+              .querySelector(".about-v18-identity-top")
+              ?.insertAdjacentHTML("afterend", `<div class="about-glance-photo">${photo}</div>`);
           });
         },
         { origin: new URL(REFERENCE_URL).origin, css: APPROVED_CSS },

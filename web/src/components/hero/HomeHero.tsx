@@ -1,6 +1,9 @@
 import Link from "next/link";
 import CvTrigger from "@/components/layout/CvTrigger";
 import LearnMoreLink from "@/components/hero/LearnMoreLink";
+import ProfileImage from "@/components/ui/ProfileImage";
+import { heroPhoto } from "@/content/photos";
+import { LINKEDIN_PROFILE_URL } from "@/lib/site";
 
 // The V21 home hero content (design-reference/index.html). It renders as a
 // fragment inside <section class="hero-zone">, after the hero header, so the
@@ -54,13 +57,14 @@ export default function HomeHero() {
                 />
               </svg>
             </a>
-            {/* Not a link until the LinkedIn URL is confirmed (as in V21). */}
-            <button
-              type="button"
-              className="hero-social-link hero-social-pending"
-              title="LinkedIn profile link coming soon"
-              aria-label="LinkedIn profile link pending"
-              aria-disabled="true"
+            {/* Confirmed 2026-11-24: V21's pending button is now a link like GitHub's. */}
+            <a
+              className="hero-social-link"
+              href={LINKEDIN_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="LinkedIn — Faizan Ali"
+              aria-label="Visit Faizan Ali on LinkedIn"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -75,19 +79,27 @@ export default function HomeHero() {
                 <rect x="2" y="9" width="4" height="12" />
                 <circle cx="4" cy="4" r="2" />
               </svg>
-            </button>
+            </a>
           </div>
         </div>
         <div className="hero-photo">
-          <div className="photo-panel">
-            <div className="avatar-circle">
-              <svg viewBox="0 0 100 100" aria-hidden="true">
-                <circle cx="50" cy="33" r="18" />
-                <path d="M18 91c1-20 12-34 32-34s31 14 32 34" />
-              </svg>
+          {/* The photo fills the V21 frame, with no caption (content/photos.ts).
+              Without it, the approved placeholder is shown. */}
+          {heroPhoto ? (
+            <div className="photo-panel photo-panel-filled">
+              <ProfileImage photo={heroPhoto} sizes="(max-width: 620px) 340px, 360px" eager />
             </div>
-            <div className="photo-label photo-label-muted">Professional photo coming soon</div>
-          </div>
+          ) : (
+            <div className="photo-panel">
+              <div className="avatar-circle">
+                <svg viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="50" cy="33" r="18" />
+                  <path d="M18 91c1-20 12-34 32-34s31 14 32 34" />
+                </svg>
+              </div>
+              <div className="photo-label photo-label-muted">Professional photo coming soon</div>
+            </div>
+          )}
         </div>
       </div>
       <LearnMoreLink />

@@ -24,7 +24,7 @@ export const faqs = [
   {
     question: "How can I get Faizan’s resume?",
     answer:
-      "My CV isn’t available to download yet. You’re welcome to request it through the Contact page or by email.",
+      "Use the “CV” button in the navigation, or “Download CV” on the homepage or the Experience page, to download my CV as a PDF.",
   },
   {
     question: "How can I contact Faizan directly?",

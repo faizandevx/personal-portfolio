@@ -60,26 +60,28 @@ changes"), the suite applies that same change to the V21 page before comparing. 
 injecting `src/styles/approved-changes.css` and setting the approved label text. Everything
 else must still match V21. The review-only elements that were removed (the note ribbon, the
 About switch and second-photo panel, the photo upload) are dropped from the V21 page before
-comparing.
+comparing. The professional photos (2026-11-23) are not in V21: the harness gives the V21 page an
+empty photo element of the same size, pixel comparisons mask `#hero .photo-panel` and
+`.about-glance-photo`, and separate checks verify the photos.
 
 ## Suites
 
-| Suite           | Checks | Covers                                                                                                                                                                                                           |
-| --------------- | -----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `contact`       |     89 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe, no kiosk references                                                                                                                          |
-| `work-skills`   |     72 | 2C: Selected work + Expertise                                                                                                                                                                                    |
-| `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                                                                                                                                               |
-| `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                                                                                                                                               |
-| `hero`          |     86 | 2A: home hero, Learn more, photo panel                                                                                                                                                                           |
-| `toggle`        |     28 | 1: theme toggle                                                                                                                                                                                                  |
-| `drawer`        |     22 | 1: mobile drawer                                                                                                                                                                                                 |
-| `scroll`        |     40 | 1: two-stage scroll navigation                                                                                                                                                                                   |
-| `footer`        |     36 | 1: footer                                                                                                                                                                                                        |
-| `cv-modal`      |     54 | 1: CV modal                                                                                                                                                                                                      |
-| `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                  |
-| `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                              |
-| `about-page`    |    283 | 3: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
-| `pages`         |    369 | 4–6: `/projects`, case study, `/experience`, `/contact` (form, email), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                                        |
+| Suite           | Checks | Covers                                                                                                                                                                                                                               |
+| --------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `contact`       |     89 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe, no kiosk references                                                                                                                                              |
+| `work-skills`   |     72 | 2C: Selected work + Expertise                                                                                                                                                                                                        |
+| `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                                                                                                                                                                   |
+| `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                                                                                                                                                                   |
+| `hero`          |     86 | 2A: home hero, Learn more, photo panel                                                                                                                                                                                               |
+| `toggle`        |     28 | 1: theme toggle                                                                                                                                                                                                                      |
+| `drawer`        |     22 | 1: mobile drawer                                                                                                                                                                                                                     |
+| `scroll`        |     40 | 1: two-stage scroll navigation                                                                                                                                                                                                       |
+| `footer`        |     36 | 1: footer                                                                                                                                                                                                                            |
+| `cv-modal`      |     54 | 1: CV modal                                                                                                                                                                                                                          |
+| `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                                      |
+| `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                                                  |
+| `about-page`    |    284 | 3 + At a glance photo: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
+| `pages`         |    371 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                                     |
 
 `pages` covers `/projects`, the case study, `/experience`, `/contact` and `/faq` at 8 widths in both
 themes, plus the skip link, 404 page, SEO files, security headers and client-side navigation. Use

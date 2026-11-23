@@ -85,11 +85,7 @@ const shot = async (p) => {
   console.log("=== 1. Markup vs V21 (node by node; href values compared separately) ===");
   let ref = await open(b, REF),
     app = await open(b, APP);
-  // Approved Phase 6 change (CLAUDE.md, change 9): the pending LinkedIn icon is a
-  // labelled image. Applied to V21 so the comparison measures everything else.
-  await ref.evaluate(() =>
-    document.querySelector(".footer-reference-icon-pending").setAttribute("role", "img"),
-  );
+  // The confirmed LinkedIn link (change 26) is applied to V21 by harness.cjs.
   const [tr, ta] = [await tree(ref), await tree(app)];
   const d = [];
   for (let i = 0; i < Math.max(tr.length, ta.length); i++)
@@ -129,29 +125,40 @@ const shot = async (p) => {
     }),
   );
 
-  console.log("\n=== 2. LinkedIn stays non-clickable ===");
+  // Approved 2026-11-24 (change 26): the confirmed LinkedIn profile.
+  console.log("\n=== 2. LinkedIn opens the confirmed profile ===");
   const li = await app.evaluate(() => {
-    const e = document.querySelector(".footer-reference-icon-pending");
+    const e = document.querySelector('footer a[href*="linkedin"]');
     e.focus();
     return {
-      tag: e.tagName,
-      href: e.getAttribute("href"),
+      link: [e.getAttribute("href"), e.target, e.rel, e.getAttribute("aria-label")].join(" "),
       focusable: document.activeElement === e,
-      label: e.getAttribute("aria-label"),
+      pending: !!document.querySelector(".footer-reference-icon-pending"),
     };
   });
   check(
-    "LinkedIn is a plain <span>: no link, not focusable",
-    li.tag === "SPAN" && li.href === null && !li.focusable,
+    "LinkedIn is a focusable link to the confirmed profile (new tab, noopener noreferrer)",
+    li.link ===
+      "https://www.linkedin.com/in/faizan-ali-5aa430380 _blank noopener noreferrer LinkedIn profile" &&
+      li.focusable &&
+      !li.pending,
     JSON.stringify(li),
   );
   const before = app.url();
-  await app.click(".footer-reference-icon-pending");
-  await app.waitForTimeout(300);
+  // Answered locally: the check is the new tab, not LinkedIn itself.
+  await app
+    .context()
+    .route("https://www.linkedin.com/**", (route) => route.fulfill({ body: "ok" }));
+  const [tab] = await Promise.all([
+    app.context().waitForEvent("page"),
+    app.click('footer a[href*="linkedin"]'),
+  ]);
   check(
-    "clicking LinkedIn goes nowhere",
-    app.url() === before && app.context().pages().length === 1,
+    "clicking LinkedIn opens a new tab and leaves this page as it was",
+    app.url() === before && /linkedin\.com\/in\//.test(tab.url()),
+    tab.url(),
   );
+  await tab.close();
 
   console.log("\n=== 3. Copyright year ===");
   check(

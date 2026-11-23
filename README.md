@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (1,268 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,271 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is used; the rest are reserved)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,7 +58,7 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 1,268 checks (about 55 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,271 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
@@ -213,12 +213,21 @@ is ever shown as working:
 
 | Item                | Current behaviour                                    | Needed                      |
 | ------------------- | ---------------------------------------------------- | --------------------------- |
-| CV download         | Modal says the CV isn't available yet                | The final CV PDF            |
-| Professional photo  | Frame with "Professional photo coming soon"          | The photo                   |
-| LinkedIn            | Marked as coming soon; not a link                    | The profile URL             |
 | WhatsApp            | Modal says chat isn't available yet; no number shown | A public number             |
 | Direct form sending | Form opens the visitor's email app instead           | A mail provider and API key |
 | Ask Faizan AI       | Labelled scripted demo with pre-written answers      | An AI provider, if wanted   |
+
+### Final assets
+
+- **Professional photos (integrated 2026-11-23):** `web/public/images/faizan-ali-hero.png` (blue
+  suit) fills the home hero frame, and `web/public/images/faizan-ali-about.png` (grey suit) sits in
+  the About "At a glance" card. They are set in `src/content/photos.ts` and served by `next/image`.
+- **CV (integrated 2026-11-23):** `web/public/cv/Faizan_CV.pdf` is the original file, and it is set as
+  `CV_FILE` in `src/lib/site.ts`. Every CV button opens the CV modal, whose "Download PDF" link
+  saves it as `Faizan-Ali-CV.pdf`. FAQ #5 points to it.
+- **LinkedIn (integrated 2026-11-24):** `https://www.linkedin.com/in/faizan-ali-5aa430380` is linked
+  from the hero, the footer, the Contact page and the structured data.
+- **WhatsApp:** this is activated only once a public number is verified.
 
 ### Accessibility (Phase 6)
 

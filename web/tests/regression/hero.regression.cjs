@@ -108,8 +108,8 @@ const SEL = [
   "#hero .hero-actions .btn-primary",
   "#hero .hero-actions .btn-secondary",
   "#hero .hero-social-row",
-  "#hero .hero-social-link:not(.hero-social-pending)",
-  "#hero .hero-social-pending",
+  '#hero .hero-social-link[href*="github"]',
+  '#hero .hero-social-link[href*="linkedin"]',
   "#hero .hero-social-link svg",
   "#hero .hero-photo",
   "#hero .photo-panel",
@@ -117,8 +117,8 @@ const SEL = [
   "#hero .hero-down-circle",
   "#hero .hero-learn-label",
 ];
-// The avatar is re-centred vertically in the panel because the instructions below it were removed: same size and x, different y.
-const SEL_MOVED = ["#hero .avatar-circle", "#hero .avatar-circle svg"];
+// The approved photo fills the panel (V21 gets the same empty element via harness.cjs).
+const SEL_MOVED = ["#hero .photo-panel > img"];
 const PROPS = [
   "display",
   "visibility",
@@ -214,12 +214,9 @@ async function pixelDiff(b, pngA, pngB) {
       app = await open(b, APP);
     const r = await serialise(ref, true),
       a = await serialise(app, false);
-    // Expected, approved differences: the photo label text, and data-link-pending (a V21 script hook with no visible effect).
-    const rAdj = r.map((l) =>
-      l
-        .replace('"Your professional photo"', '"Professional photo coming soon"')
-        .replace("<div class=photo-label>", "<div class=photo-label photo-label-muted>"),
-    );
+    // The approved photo (change 25) is applied to V21 by harness.cjs, so the photo
+    // panel compares as-is.
+    const rAdj = r;
     const diffs = [];
     for (let i = 0; i < Math.max(rAdj.length, a.length); i++)
       if (rAdj[i] !== a[i]) diffs.push(`\n   line ${i}: V21 ${rAdj[i]}\n           app ${a[i]}`);
@@ -245,13 +242,26 @@ async function pixelDiff(b, pngA, pngB) {
         !removed.tag &&
         !/Photo-ready|Add Your Photo|stays on your device/i.test(removed.text),
     );
+    const photo = await app.evaluate(() => {
+      const img = document.querySelector("#hero .photo-panel > img.profile-photo");
+      return {
+        alt: img?.alt,
+        src: img?.currentSrc.includes("faizan-ali-hero.png"),
+        loaded: img?.complete && img.naturalWidth > 0,
+        eager: img?.loading === "eager" && img.fetchPriority === "high",
+        label: !!document.querySelector("#hero .photo-label"),
+        avatar: !!document.querySelector("#hero .avatar-circle"),
+      };
+    });
     check(
-      "photo panel shows exactly 'Professional photo coming soon'",
-      await app.evaluate(
-        () =>
-          document.querySelector("#hero .photo-label")?.textContent ===
-          "Professional photo coming soon",
-      ),
+      "photo panel shows the blue-suit photo (loaded eagerly, alt text), with no caption or avatar outline",
+      photo.alt === "Faizan Ali in a navy three-piece suit" &&
+        photo.src &&
+        photo.loaded &&
+        photo.eager &&
+        !photo.label &&
+        !photo.avatar,
+      JSON.stringify(photo),
     );
     check(
       "section order unchanged: #hero then #home-about (temporary target)",
@@ -290,15 +300,16 @@ async function pixelDiff(b, pngA, pngB) {
           x === am[i] ? null : `\n   V21 ${x.slice(0, 200)}\n   app ${am[i].slice(0, 200)}`,
         )
         .filter(Boolean);
-      const label = await app.evaluate(() => {
-        const l = document.querySelector("#hero .photo-label"),
-          c = getComputedStyle(l),
-          r = l.getBoundingClientRect();
+      const photo = await app.evaluate(() => {
+        const img = document.querySelector("#hero .photo-panel > img"),
+          c = getComputedStyle(img),
+          r = img.getBoundingClientRect(),
+          p = img.parentElement.getBoundingClientRect();
         return {
-          fs: c.fontSize,
-          fw: c.fontWeight,
-          lines: Math.round(r.height / parseFloat(c.lineHeight || 20)) || 1,
-          fits: r.width <= l.parentElement.getBoundingClientRect().width,
+          fit: c.objectFit,
+          pos: c.objectPosition,
+          fills: r.width === p.width && r.height === p.height,
+          ratio: Math.round((p.width / p.height) * 100) / 100,
         };
       });
       check(
@@ -307,12 +318,13 @@ async function pixelDiff(b, pngA, pngB) {
         diffs.slice(0, 2).join(""),
       );
       check(
-        `${theme} @${width}: avatar same size/x/styles (re-centred vertically only); label is the approved smaller, muted style`,
+        `${theme} @${width}: photo fills the 4:5 frame, uncropped at the top and never stretched (object-fit: cover)`,
         mdiffs.length === 0 &&
-          label.fs === (width <= 620 ? "13px" : "14px") &&
-          label.fw === "600" &&
-          label.fits,
-        mdiffs.join("") + ` label ${JSON.stringify(label)}`,
+          photo.fit === "cover" &&
+          photo.pos === "50% 0%" &&
+          photo.fills &&
+          photo.ratio === 0.8,
+        mdiffs.join("") + ` photo ${JSON.stringify(photo)}`,
       );
       await ref.context().close();
       await app.context().close();
@@ -482,7 +494,7 @@ async function pixelDiff(b, pngA, pngB) {
     }));
     check(
       `@${width}: hero '↓ Download CV' opens the one shared CV modal`,
-      s.open && s.focus === "Understood ✓" && s.modals === 1 && q.url() === url,
+      s.open && s.focus === "Download PDF ↓" && s.modals === 1 && q.url() === url,
       JSON.stringify(s),
     );
     await q.keyboard.press("Escape");
@@ -500,13 +512,13 @@ async function pixelDiff(b, pngA, pngB) {
   {
     const q = await open(b, APP);
     const l = await q.evaluate(() => {
-      const gh = document.querySelector("#hero .hero-social-link[href]"),
-        li = document.querySelector("#hero .hero-social-pending");
+      const gh = document.querySelector('#hero .hero-social-link[href*="github"]'),
+        li = document.querySelector('#hero .hero-social-link[href*="linkedin"]');
       return {
         about: document.querySelector("#hero .hero-actions .btn-primary").getAttribute("href"),
         gh: [gh.href, gh.target, gh.rel].join(" "),
-        liTag: li.tagName,
-        liHref: li.hasAttribute("href"),
+        li: [li.href, li.target, li.rel, li.getAttribute("aria-label")].join(" "),
+        pending: !!document.querySelector("#hero .hero-social-pending, #hero [aria-disabled]"),
         links: [...document.querySelectorAll("#hero > :not(header) a[href], #hero > a[href]")].map(
           (a) => a.getAttribute("href"),
         ),
@@ -518,25 +530,42 @@ async function pixelDiff(b, pngA, pngB) {
       l.gh === "https://github.com/faizandevx _blank noopener noreferrer",
       l.gh,
     );
+    // Approved 2026-11-24 (change 26): the confirmed LinkedIn profile.
     check(
-      "LinkedIn is a non-link 'pending' button (no URL yet)",
-      l.liTag === "BUTTON" && !l.liHref,
+      "LinkedIn opens the confirmed profile in a new tab with noopener noreferrer; nothing pending",
+      l.li ===
+        "https://www.linkedin.com/in/faizan-ali-5aa430380 _blank noopener noreferrer Visit Faizan Ali on LinkedIn" &&
+        !l.pending,
+      l.li,
     );
     check(
       "no private/unknown links in the hero",
       l.links.every((h) =>
-        ["/about", "#cv-preview", "https://github.com/faizandevx", "#home-about"].includes(h),
+        [
+          "/about",
+          "#cv-preview",
+          "https://github.com/faizandevx",
+          "https://www.linkedin.com/in/faizan-ali-5aa430380",
+          "#home-about",
+        ].includes(h),
       ),
       l.links.join(", "),
     );
     const before = q.url();
-    // force: Playwright refuses to click aria-disabled controls, but a visitor still can.
-    await q.click("#hero .hero-social-pending", { force: true });
-    await q.waitForTimeout(200);
+    // Answer locally: the check is that a new tab opens on the profile, not LinkedIn itself.
+    await q
+      .context()
+      .route("https://www.linkedin.com/**", (route) => route.fulfill({ body: "ok" }));
+    const [tab] = await Promise.all([
+      q.context().waitForEvent("page"),
+      q.click('#hero .hero-social-link[href*="linkedin"]'),
+    ]);
     check(
-      "clicking LinkedIn does nothing (no navigation, no errors)",
-      q.url() === before && q.errs.length === 0,
+      "clicking LinkedIn opens it in a new tab; this page stays put, with no errors",
+      q.url() === before && q.errs.length === 0 && /linkedin\.com\/in\//.test(tab.url()),
+      tab.url(),
     );
+    await tab.close();
     await q.click("#hero .hero-actions .btn-primary");
     await q.waitForURL("**/about", { timeout: 5000 }).catch(() => {});
     check("'About Me' navigates client-side to /about", q.url().endsWith("/about"), q.url());

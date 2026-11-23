@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 // The site's 404 page, built from the V21 inner-page hero.
 export default function NotFound() {
   return (
-    <main id="main-content">
-      <InsideHero>
+    <main id="main-content" className="not-found-main">
+      <InsideHero className="not-found-hero">
         <div className="container">
           <div className="eyebrow page-section-label">Page not found</div>
           <h1>

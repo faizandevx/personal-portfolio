@@ -79,6 +79,11 @@ const APPLY = {
   contact: () => {
     for (const s of [".inside-hero .container > .eyebrow", ".contact-form-card .eyebrow"])
       document.querySelector(s).classList.add("page-section-label");
+    // Approved 2026-11-23: the hero label's two phrases never break mid-phrase.
+    const label = document.querySelector(".inside-hero .container > .eyebrow");
+    label.classList.add("contact-hero-label");
+    label.innerHTML =
+      '<span class="eyebrow-phrase">LET\'S CONNECT</span> <span class="eyebrow-line"></span> <span class="eyebrow-phrase">OPEN TO OPPORTUNITIES</span>';
     document.querySelector(".demo-disclaimer").remove();
     document.querySelector(".send-btn").innerHTML =
       'Send via email <span aria-hidden="true">↗</span>';
@@ -86,9 +91,20 @@ const APPLY = {
       '<span aria-hidden="true">◇</span> Opens your email app. Nothing is stored on this site.';
     document.querySelector(".connect-feature p").textContent =
       "WhatsApp chat isn't available yet. Email is the best way to reach me.";
-    document.querySelector(".contact-side small").textContent = "· Profile link coming soon";
     // WCAG 2.5.3: the link's name comes from its visible text.
     document.querySelector("a.contact-method").removeAttribute("aria-label");
+    // Approved 2026-11-24 (change 26): the LinkedIn card links to the confirmed profile.
+    const card = document.querySelector(".contact-side small").closest(".contact-method");
+    const link = document.createElement("a");
+    link.className = "contact-method";
+    link.setAttribute("href", "https://www.linkedin.com/in/faizan-ali-5aa430380");
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    link.innerHTML = card.innerHTML;
+    link.querySelector("strong").innerHTML =
+      'LinkedIn<span class="sr-only"> (opens in a new tab)</span>';
+    link.insertAdjacentHTML("beforeend", '<span aria-hidden="true" class="method-arrow">↗</span>');
+    card.replaceWith(link);
   },
   faq: () => {
     for (const s of [".inside-hero .container > .eyebrow", ".faq-section-intro .eyebrow"])
@@ -100,7 +116,7 @@ const APPLY = {
       .forEach((a) => a.setAttribute("href", "/contact"));
     const answers = {
       3: "Yes. Browse the Projects page for selected work and its case study. Some work uses private repositories or cannot disclose confidential implementation details.",
-      5: "My CV isn’t available to download yet. You’re welcome to request it through the Contact page or by email.",
+      5: "Use the “CV” button in the navigation, or “Download CV” on the homepage or the Experience page, to download my CV as a PDF.",
       6: "Use the Contact page or email me at faizandevx@gmail.com. WhatsApp chat isn’t available yet.",
       7: "No. “Ask Faizan AI” on the homepage is a scripted demo with pre-written answers about this portfolio. It isn’t a live AI, and it isn’t a replacement for contacting Faizan directly.",
     };
@@ -577,6 +593,34 @@ const BEHAVIOUR = {
     await q.context().close();
   },
   async contact(b, page) {
+    {
+      // Approved 2026-11-23: one line where it fits, otherwise two whole phrases.
+      const lines = [];
+      for (const width of [1440, 620, 480, 390, 360]) {
+        const p = await open(b, appPage(page.route), { width });
+        lines.push(
+          await p.evaluate(() => {
+            const label = document.querySelector(".contact-hero-label");
+            const rows = new Set(
+              [...label.querySelectorAll(".eyebrow-phrase")].flatMap((s) =>
+                [...s.getClientRects()].map((r) => Math.round(r.top)),
+              ),
+            );
+            const phrases = [...label.querySelectorAll(".eyebrow-phrase")].map(
+              (s) => s.getClientRects().length,
+            );
+            const line = getComputedStyle(label.querySelector(".eyebrow-line")).display;
+            return `${rows.size}:${phrases.join("")}:${line}`;
+          }),
+        );
+        await p.context().close();
+      }
+      check(
+        "hero label: one line with the divider at 620px+, two whole phrases without it at 480px and below",
+        lines.join() === "1:11:inline-block,1:11:inline-block,2:11:none,2:11:none,2:11:none",
+        lines.join(),
+      );
+    }
     const q = await open(b, appPage(page.route));
     const mailto = [];
     const cdp = await q.context().newCDPSession(q);
@@ -660,9 +704,14 @@ const BEHAVIOUR = {
       requests.join(", "),
     );
     check(
-      "email method links to mailto; there is no WhatsApp or LinkedIn link until they are confirmed",
+      "email method links to mailto; LinkedIn opens the confirmed profile in a new tab; no WhatsApp link",
       (await q.locator('a.contact-method[href="mailto:faizandevx@gmail.com"]').count()) === 1 &&
-        (await q.locator('main a[href*="whatsapp" i], main a[href*="linkedin" i]').count()) === 0,
+        (await q
+          .locator(
+            'main a.contact-method[href="https://www.linkedin.com/in/faizan-ali-5aa430380"][target="_blank"][rel="noopener noreferrer"]',
+          )
+          .count()) === 1 &&
+        (await q.locator('main a[href*="whatsapp" i], main a[href*="wa.me" i]').count()) === 0,
     );
     await q.context().close();
     const [ref, app] = await both(b, page, { motion: "no-preference" });
@@ -678,12 +727,13 @@ const BEHAVIOUR = {
       "field focus style matches V21",
       (await read(ref, "#contact-name")) === (await read(app, "#contact-name")),
     );
-    await ref.hover("a.contact-method");
-    await app.hover("a.contact-method");
+    await ref.hover('a.contact-method[href^="mailto:"]');
+    await app.hover('a.contact-method[href^="mailto:"]');
     await app.waitForTimeout(500);
     check(
       "email method hover matches V21",
-      (await read(ref, "a.contact-method")) === (await read(app, "a.contact-method")),
+      (await read(ref, 'a.contact-method[href^="mailto:"]')) ===
+        (await read(app, 'a.contact-method[href^="mailto:"]')),
     );
     await closeAll(ref, app);
   },
@@ -868,6 +918,44 @@ async function siteChecks(b) {
     await q.context().close();
   }
   {
+    // Approved 2026-11-23: on tall screens the 404 hero grows so the footer reaches the
+    // bottom of the window; after leaving the 404, the home page is laid out as before.
+    const fills = [];
+    for (const [width, height] of [
+      [1440, 1600],
+      [1920, 1080],
+      [390, 1100],
+      [1440, 600],
+    ]) {
+      const p = await open(b, appPage("no-such-page"), { width, height });
+      fills.push(
+        await p.evaluate(() => {
+          const foot = document.querySelector(".site-footer").getBoundingClientRect().bottom;
+          const doc = document.documentElement.scrollHeight;
+          return Math.abs(foot + window.scrollY - doc) <= 1 && doc >= innerHeight;
+        }),
+      );
+      await p.context().close();
+    }
+    const p = await open(b, appPage("no-such-page"), { width: 1440, height: 1600 });
+    await p.locator("main:visible a.btn-primary").click();
+    await p.waitForURL((url) => url.pathname === "/");
+    await p.waitForTimeout(400);
+    const home = await p.evaluate(() => {
+      const hidden = document.querySelector("main.not-found-main");
+      return {
+        body: getComputedStyle(document.body).display,
+        hidden404: !hidden || getComputedStyle(hidden).display === "none",
+      };
+    });
+    await p.context().close();
+    check(
+      "404 page: the footer reaches the bottom of tall windows; other pages keep the normal body layout",
+      fills.every(Boolean) && home.body === "block" && home.hidden404,
+      JSON.stringify({ fills, home }),
+    );
+  }
+  {
     const sitemap = await (await req.get(appPage("sitemap.xml"))).text();
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
     check(
@@ -895,7 +983,8 @@ async function siteChecks(b) {
       ld["@type"] === "Person" &&
         ld.name === "Faizan Ali" &&
         ld.email === "mailto:faizandevx@gmail.com" &&
-        ld.sameAs?.join() === "https://github.com/faizandevx" &&
+        ld.sameAs?.join() ===
+          "https://github.com/faizandevx,https://www.linkedin.com/in/faizan-ali-5aa430380" &&
         !("telephone" in ld),
       JSON.stringify(ld),
     );

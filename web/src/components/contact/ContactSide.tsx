@@ -1,7 +1,7 @@
-import { PUBLIC_EMAIL } from "@/lib/site";
+import { LINKEDIN_PROFILE_URL, PUBLIC_EMAIL } from "@/lib/site";
 
-// The "other ways to connect" column (design-reference/contact.html). Email is the
-// working method; WhatsApp and LinkedIn are marked as not available yet.
+// The "other ways to connect" column (design-reference/contact.html). Email
+// and LinkedIn are working links; WhatsApp is marked as not available yet.
 export default function ContactSide() {
   return (
     <aside aria-label="Other ways to connect" className="contact-side">
@@ -59,7 +59,12 @@ export default function ContactSide() {
           <strong>Remote · On-site · International</strong>
         </span>
       </div>
-      <div className="contact-method contact-static">
+      <a
+        className="contact-method"
+        href={LINKEDIN_PROFILE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <span aria-hidden="true" className="method-icon">
           <svg
             fill="none"
@@ -76,10 +81,13 @@ export default function ContactSide() {
         <span className="method-copy">
           <span className="method-label">Professional network</span>
           <strong>
-            LinkedIn <small>· Profile link coming soon</small>
+            LinkedIn<span className="sr-only"> (opens in a new tab)</span>
           </strong>
         </span>
-      </div>
+        <span aria-hidden="true" className="method-arrow">
+          ↗
+        </span>
+      </a>
       <div className="aside-footer">
         <span aria-hidden="true" className="aside-status"></span> Available for meaningful projects
         and opportunities.

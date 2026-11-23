@@ -634,8 +634,12 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
             continue;
           }
           if (c.nodeType !== 1) continue;
+          // The approved photo (change 25): V21 gets only its class and style; the
+          // next/image attributes (src, srcset, alt, loading) are checked on their own.
+          const photo = c.matches("img.profile-photo");
           out.push(
             `${"  ".repeat(depth)}<${c.tagName.toLowerCase()} ${[...c.attributes]
+              .filter((a) => !photo || ["class", "style"].includes(a.name))
               .map((a) => `${a.name}=${a.value}`)
               .sort()
               .join(" ")}>`,
@@ -813,7 +817,10 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       ]) {
         await q.addStyleTag({ content: NO_HEADERS });
         shots[k] = {
-          story: await q.locator("#my-story").screenshot({ animations: "disabled" }),
+          // The approved photo (change 25) is not in V21: masked here, checked on its own.
+          story: await q
+            .locator("#my-story")
+            .screenshot({ animations: "disabled", mask: [q.locator(".about-glance-photo")] }),
           journey: await q.locator("#journey").screenshot({ animations: "disabled" }),
         };
       }
@@ -847,7 +854,7 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
                 ? "#journey"
                 : "#my-story",
             )
-            .screenshot({ animations: "disabled" }),
+            .screenshot({ animations: "disabled", mask: [q.locator(".about-glance-photo")] }),
         );
         await q.context().close();
       }
@@ -1216,7 +1223,13 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       const shots = [];
       for (const q of [ref, app]) {
         await q.addStyleTag({ content: NO_HEADERS });
-        shots.push(await q.screenshot({ fullPage: true, animations: "disabled" }));
+        shots.push(
+          await q.screenshot({
+            fullPage: true,
+            animations: "disabled",
+            mask: [q.locator(".about-glance-photo")],
+          }),
+        );
       }
       const d = await pixelDiff(b, shots[0], shots[1]);
       check(`${theme} @${width}: full-page pixels`, ok(d), fmt(d));
@@ -1239,6 +1252,10 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       const seq = [];
       for (let i = 0; i < 80; i++) {
         await q.keyboard.press("Tab");
+        // A person's pace between key presses. Without a pause, the next Tab can come
+        // before the app's floating header renders (one frame after the scroll; V21 shows
+        // it in the same frame), and focus skips it. Same pause for V21 and the app.
+        await q.waitForTimeout(100);
         const f = await q.evaluate(() => {
           const e = document.activeElement;
           if (!e || e === document.body) return null;
@@ -1400,6 +1417,8 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       "/faq 200",
       "#cv-preview cv-trigger:true",
       "#my-story 200 #my-story:true",
+      // The CV PDF in the CV modal (change 24).
+      "/cv/Faizan_CV.pdf 200",
       "/#home-skills 200 #home-skills:true",
       "/about#education 200 #education:true",
     ];
@@ -1407,6 +1426,51 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       "routes: every page and anchor the About page links to works",
       JSON.stringify(res) === JSON.stringify(expected),
       res.join(" | "),
+    );
+  }
+
+  console.log("\n=== Approved 2026-11-23: grey-suit photo in 'At a glance' (change 25) ===");
+  {
+    const seen = [];
+    for (const theme of ["dark", "light"])
+      for (const width of [1920, 1440, 768, 390]) {
+        const q = await open(b, APP, { width, theme });
+        await q.locator(".about-glance-photo img").scrollIntoViewIfNeeded();
+        await q.waitForFunction(() => {
+          const img = document.querySelector(".about-glance-photo img");
+          return img.complete && img.naturalWidth > 0;
+        });
+        seen.push(
+          await q.evaluate(() => {
+            const wrap = document.querySelector(".about-glance-photo");
+            const img = wrap.querySelector("img");
+            const w = wrap.getBoundingClientRect();
+            const card = document.querySelector(".about-v18-identity").getBoundingClientRect();
+            const top = document.querySelector(".about-v18-identity-top").getBoundingClientRect();
+            const h3 = document.querySelector(".about-v18-identity h3").getBoundingClientRect();
+            const c = getComputedStyle(img);
+            const wc = getComputedStyle(wrap);
+            return (
+              img.alt === "Faizan Ali in a grey three-piece suit" &&
+              img.currentSrc.includes("faizan-ali-about.png") &&
+              img.loading === "lazy" &&
+              c.objectFit === "cover" &&
+              Math.abs(w.width / w.height - 4 / 3) < 0.01 &&
+              wc.borderTopWidth === "0px" &&
+              wc.boxShadow === "none" &&
+              w.left >= card.left &&
+              w.right <= card.right &&
+              w.top >= top.bottom &&
+              h3.top >= w.bottom
+            );
+          }),
+        );
+        await q.context().close();
+      }
+    check(
+      "At a glance photo: loaded, alt text, 4:3 and never stretched, no border or shadow, inside the card between its label row and heading (8 widths/themes)",
+      seen.every(Boolean),
+      seen.join(","),
     );
   }
 

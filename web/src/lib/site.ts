@@ -14,6 +14,12 @@ export const SITE_DESCRIPTION =
 
 export const PUBLIC_EMAIL = "faizandevx@gmail.com";
 export const GITHUB_PROFILE_URL = "https://github.com/faizandevx";
+// Confirmed by the user on 2026-11-24 (the URL on the CV).
+export const LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/faizan-ali-5aa430380";
+
+// The CV PDF under web/public/ (the original file, unedited; it downloads as
+// Faizan-Ali-CV.pdf). If set to null, the CV modal says the CV isn't available yet.
+export const CV_FILE: string | null = "/cv/Faizan_CV.pdf";
 
 // Indexable routes, also the source of the sitemap.
 export const STATIC_ROUTES = ["/", "/about", "/projects", "/experience", "/contact", "/faq"];

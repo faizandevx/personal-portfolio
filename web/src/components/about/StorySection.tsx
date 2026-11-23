@@ -1,5 +1,7 @@
 import Link from "next/link";
 import EmployerLink from "@/components/ui/EmployerLink";
+import ProfileImage from "@/components/ui/ProfileImage";
+import { aboutPhoto } from "@/content/photos";
 
 // The V21 About page story and "At a glance" card (design-reference/about.html,
 // #my-story). Approved changes: "AlphaSoft360" (V21: "AlphaSoft K60"), and the two
@@ -48,6 +50,11 @@ export default function StorySection() {
             <span className="eyebrow">AT A GLANCE</span>
             <span className="about-v18-spark">✳</span>
           </div>
+          {aboutPhoto && (
+            <div className="about-glance-photo">
+              <ProfileImage photo={aboutPhoto} sizes="(max-width: 760px) 90vw, 460px" />
+            </div>
+          )}
           <h3>
             Two perspectives.
             <br />

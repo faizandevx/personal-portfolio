@@ -8,6 +8,7 @@ import { MenuProvider } from "@/context/MenuContext";
 import { ScrollNavProvider } from "@/context/ScrollNavContext";
 import {
   GITHUB_PROFILE_URL,
+  LINKEDIN_PROFILE_URL,
   PUBLIC_EMAIL,
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -34,7 +35,7 @@ const personJsonLd = JSON.stringify({
   jobTitle: "Software Engineer & IT Project Manager",
   url: SITE_URL,
   email: `mailto:${PUBLIC_EMAIL}`,
-  sameAs: [GITHUB_PROFILE_URL],
+  sameAs: [GITHUB_PROFILE_URL, LINKEDIN_PROFILE_URL],
 });
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

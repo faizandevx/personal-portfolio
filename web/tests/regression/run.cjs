@@ -38,14 +38,17 @@ const SUITES = [
     52,
     "Phase 2E + 6: whole homepage (structure, links, keyboard, axe, motion, overflow, a11y fixes)",
   ],
+  // 283 checks from Phase 3 + 1 for the approved 2026-11-23 "At a glance" photo.
   [
     "about-page",
-    283,
+    284,
     "Phase 3: /about page (3B hero + workflow visual; 3C story, at a glance, career journey; 3D capabilities, approach, education, CTA; 3E whole page)",
   ],
+  // 369 checks from Phases 4-6 + 2 for the approved 2026-11-23 fixes (Contact hero
+  // label wrapping, 404 footer on tall screens).
   [
     "pages",
-    369,
+    371,
     "Phases 4-6: /projects, case study, /experience, /contact, /faq vs V21; skip link, 404, SEO files, headers",
   ],
 ];
