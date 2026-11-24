@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 
 // The public address of the site, used for canonical links, Open Graph, the
-// sitemap and robots.txt. Set NEXT_PUBLIC_SITE_URL when the site is deployed.
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
-  /\/+$/,
-  "",
-);
+// sitemap and robots.txt. In order:
+// 1. NEXT_PUBLIC_SITE_URL, set in Vercel once the final address is known;
+// 2. on Vercel, the project's production address (VERCEL_PROJECT_PRODUCTION_URL, a
+//    host name with no protocol), so even the first deployment and previews never
+//    point to localhost;
+// 3. locally, http://localhost:3000.
+const vercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (vercelProductionUrl ? `https://${vercelProductionUrl}` : "http://localhost:3000")
+).replace(/\/+$/, "");
 
 export const SITE_NAME = "Faizan Ali";
 export const SITE_TITLE = "Faizan Ali | Software Engineer & IT Project Manager";

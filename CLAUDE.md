@@ -178,7 +178,7 @@ intentional differences.
     metadata (`pageMetadata` in `lib/site.ts`), sitemap, robots, Open Graph image, Person JSON-LD and
     security headers. `src/proxy.ts` gives unknown project URLs a real 404 status, because the partially
     prerendered case-study route has already started its response when `notFound()` runs (and
-    `dynamicParams` is unavailable with Cache Components). `NEXT_PUBLIC_SITE_URL` must be set on deployment; the fallback is localhost.
+    `dynamicParams` is unavailable with Cache Components). `SITE_URL` (`lib/site.ts`) is `NEXT_PUBLIC_SITE_URL`, then Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, then localhost (see README, "Before and after deployment").
 
 **Final pre-deployment improvements** (approved 2026-11-23)
 
@@ -260,8 +260,12 @@ Read this first when resuming after a compaction or in a new session.
 - **Regression totals:** 1,271 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 371. Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
 - **External details still needed:** WhatsApp number, mail provider and
-  `NEXT_PUBLIC_SITE_URL` (see README). Phases 4–7 are complete and pushed. Deploy only after the user
+  the final domain for `NEXT_PUBLIC_SITE_URL` (optional on Vercel; see README). Phases 4–7 are complete and pushed. Deploy only after the user
   approves.
+- **Deployment preparation (2026-11-24):** Next.js was upgraded from 16.4.3 to 16.4.6 (approved patch for 7
+  moderate `npm audit` advisories), together with `eslint-config-next`. `SITE_URL` falls back to
+  Vercel's production address. Vercel: Root Directory `web`, Production Branch `main`, no
+  `vercel.json`. Push and deploy only with the user's approval.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git
@@ -299,7 +303,7 @@ Read this first when resuming after a compaction or in a new session.
 
 ## Next.js notes
 
-- Next.js **16.4** (Turbopack by default). Read `web/AGENTS.md` and the bundled docs in
+- Next.js **16.4.6** (Turbopack by default). Read `web/AGENTS.md` and the bundled docs in
   `web/node_modules/next/dist/docs/` before using unfamiliar APIs. This version differs from
   older training data.
 - `next.config.ts` enables `cacheComponents` (from the scaffold). Uncached dynamic data must sit

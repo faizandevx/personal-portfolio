@@ -22,7 +22,7 @@ personal-portfolio/
 │  ├─ tests/e2e/       Playwright smoke tests
 │  ├─ tests/regression/  V21 parity + behaviour suites (1,271 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
-│  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is used; the rest are reserved)
+│  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is optional; the rest are reserved)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
 ├─ .gitattributes      LF line endings; design-reference/ is never converted
 ├─ .gitignore
@@ -68,7 +68,7 @@ npm run test:regression:parallel          # same checks, up to 3 suites at once 
 
 | Area      | Choice                                                                        |
 | --------- | ----------------------------------------------------------------------------- |
-| Framework | Next.js 16.4 (App Router, Turbopack), React 19.3                              |
+| Framework | Next.js 16.4.6 (App Router, Turbopack), React 19.3                            |
 | Language  | TypeScript 5.9 (strict)                                                       |
 | Styling   | Approved V21 CSS (global, unlayered) + Tailwind CSS 4.3 **without Preflight** |
 | Quality   | ESLint 9 (`eslint-config-next`), Prettier 3                                   |
@@ -203,8 +203,21 @@ Phase 1 is complete and approved.
 
 ## Before and after deployment
 
-Set `NEXT_PUBLIC_SITE_URL` to the public address when deploying. Without it, canonical links, the
-sitemap and robots.txt point to `http://localhost:3000`.
+The site's public address (canonical links, Open Graph, `sitemap.xml`, `robots.txt`) comes from
+`src/lib/site.ts`, in this order:
+
+1. `NEXT_PUBLIC_SITE_URL`, when it is set.
+2. On Vercel, the project's production address (`VERCEL_PROJECT_PRODUCTION_URL`, set by Vercel at
+   build time). Even the first deployment, and every preview, points to the production address,
+   never to localhost.
+3. Locally, `http://localhost:3000`.
+
+Once the final address is known, set `NEXT_PUBLIC_SITE_URL` in Vercel (Production and Preview) to
+it, with `https://` and no trailing slash, and redeploy. The value is read at build time.
+
+Vercel settings: Framework Next.js, Root Directory `web`, default build (`next build`) and install
+(`npm install`, from `package-lock.json`) commands, Production Branch `main`. No `vercel.json` is
+needed. Next.js 16.4.6 needs Node.js 20.9 or later.
 
 ## Not connected yet (by design)
 
