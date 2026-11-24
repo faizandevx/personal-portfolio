@@ -223,6 +223,16 @@ Lighthouse 13.6.0, median of 3 runs on the local production build (`next start`)
 These are lab results with simulated throttling. They are not field data: there is no Chrome UX
 Report data yet, so INP and real-user Core Web Vitals are unknown.
 
+## Search engines
+
+- **Google Search Console:** URL-prefix property `https://faizanalidevx.vercel.app/`, verified by the
+  HTML tag in `src/app/layout.tsx` (`verification.google`). Keep the tag, or the property loses
+  verification. Sitemap: `https://faizanalidevx.vercel.app/sitemap.xml`.
+- **Bing Webmaster Tools:** imported from Search Console (site and sitemap).
+- **Weekly check:** indexed pages (7 expected), impressions, clicks, CTR, average position; queries
+  for the name, "software developer", "full stack", "Next.js" and "IT project manager"; Core Web
+  Vitals once Google has enough real-user data.
+
 ## Before and after deployment
 
 The site's public address (canonical links, Open Graph, `sitemap.xml`, `robots.txt`) comes from

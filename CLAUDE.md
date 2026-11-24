@@ -299,6 +299,14 @@ Read this first when resuming after a compaction or in a new session.
   already preloaded with high priority, about 16 KB WebP. axe with WCAG 2.2 AA tags finds no
   violations on the 7 pages or the 404, at 390 and 1440px, in both themes, and nothing scrolls
   sideways. There is no field data (CrUX or INP) yet, so nothing is claimed about real users.
+- **SEO Phase 4, search indexing (2026-11-25).** The SEO commit `bad85f4` is pushed and deployed. The
+  live site checks out: canonical links, Open Graph, JSON-LD, sitemap (7 URLs), robots, 404s with
+  `noindex`, and the http and trailing-slash redirects. The project's other Vercel URLs need a
+  Vercel login and send `X-Robots-Tag: noindex`. `faizan-ali-portfolio.vercel.app` is someone
+  else's site. Google Search Console uses a URL-prefix property verified by an HTML tag
+  (`verification.google` in `app/layout.tsx`; the token is public by design). Do not remove it.
+  Bing Webmaster Tools is set up by importing from Search Console. IndexNow is not used: the site
+  rarely changes. Never report indexing, impressions or rankings without Search Console or Bing data.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git

@@ -25,6 +25,8 @@ export const metadata: Metadata = {
     url: "/",
   },
   twitter: { card: "summary_large_image", title: SITE_TITLE },
+  // Google Search Console ownership (URL-prefix property https://faizanalidevx.vercel.app/).
+  verification: { google: "ewlAElIboOKoLmjZwBuEctmQfRBosD2B7e0VC8DayYE" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
