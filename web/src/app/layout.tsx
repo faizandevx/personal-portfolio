@@ -6,15 +6,9 @@ import CvModal from "@/components/modals/CvModal";
 import { CvModalProvider } from "@/context/CvModalContext";
 import { MenuProvider } from "@/context/MenuContext";
 import { ScrollNavProvider } from "@/context/ScrollNavContext";
-import {
-  GITHUB_PROFILE_URL,
-  LINKEDIN_PROFILE_URL,
-  PUBLIC_EMAIL,
-  SITE_DESCRIPTION,
-  SITE_NAME,
-  SITE_TITLE,
-  SITE_URL,
-} from "@/lib/site";
+import JsonLd from "@/components/seo/JsonLd";
+import { OG_LOCALE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { siteJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 
 // Root layout: the shared V21 frame around every page (hero/floating header,
@@ -23,20 +17,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  openGraph: { type: "website", siteName: SITE_NAME, title: SITE_TITLE, url: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
+    title: SITE_TITLE,
+    url: "/",
+  },
   twitter: { card: "summary_large_image", title: SITE_TITLE },
 };
-
-// Search engines' structured description of the site's owner: public details only.
-const personJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: SITE_NAME,
-  jobTitle: "Software Engineer & IT Project Manager",
-  url: SITE_URL,
-  email: `mailto:${PUBLIC_EMAIL}`,
-  sameAs: [GITHUB_PROFILE_URL, LINKEDIN_PROFILE_URL],
-});
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -46,7 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <ThemeScript />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: personJsonLd }} />
+        {/* Who the site is about, and the site itself (lib/structured-data.ts). */}
+        <JsonLd data={siteJsonLd} />
       </head>
       <body>
         <a className="skip-link" href="#main-content">

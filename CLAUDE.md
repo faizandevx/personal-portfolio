@@ -227,6 +227,28 @@ intentional differences.
     - `harness.cjs` applies the same markup to the V21 pages. AlphaSoft360's dates stay as on the
       site (Mar 2025), by the user's choice.
 
+27. SEO Phase 1 (2026-11-24; metadata only, no visible change). The home page sets its own
+    canonical link (`/`) in `app/page.tsx`, not the layout, so that the 404 page has none.
+    `pageMetadata` repeats the Open Graph type, site name and share image (`/opengraph-image`)
+    and sets a `summary_large_image` Twitter card, because a page's `openGraph`/`twitter` objects
+    replace the layout's (shallow merge). The `pages` suite checks each page's share image and card,
+    and that every sitemap URL is its page's canonical link.
+28. SEO Phase 2 (2026-11-24; head and JSON-LD only, no visible change).
+    - Titles and descriptions (each page file, and `SITE_DESCRIPTION`) use only what the pages show:
+      Software Engineer / Software Developer (the AlphaSoft360 role), IT Project Manager,
+      full-stack, Next.js, Pakistan. Every title and description is different. The home title
+      still starts with "Faizan Ali", and About keeps its V21 title. The case-study title comes
+      from `metaTitle` in `content/projects.ts`.
+    - `og:locale` is `en_US`. About uses the Open Graph `profile` type (first and last name); the
+      other pages use `website`.
+    - JSON-LD (`lib/structured-data.ts`, rendered by `components/seo/JsonLd.tsx`). The layout's
+      `<head>` has a site graph with Person (`/#person`) and WebSite (`/#website`). Each page adds
+      its own graph **after `</main>`**, so the DOM inside `<main>` still matches V21. That graph is
+      WebPage, ProfilePage (About), CollectionPage (Projects), ContactPage or FAQPage (from
+      `content/faq.ts`), plus a BreadcrumbList below the home page. The case study's main entity is
+      its public repository (SoftwareSourceCode). Never add ratings, awards, credentials or
+      employers (`worksFor`) to it; the `pages` suite checks for them.
+
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
 `display:none`, so tests after client-side navigation must target visible elements (`h1:visible`).
@@ -266,6 +288,17 @@ Read this first when resuming after a compaction or in a new session.
   moderate `npm audit` advisories), together with `eslint-config-next`. `SITE_URL` falls back to
   Vercel's production address. Vercel: Root Directory `web`, Production Branch `main`, no
   `vercel.json`. Push and deploy only with the user's approval.
+- **SEO Phase 3, performance and accessibility (2026-11-25): measured, no code change needed.**
+  Lighthouse 13.6.0 (run from a scratch folder, not a project dependency), median of 3 runs, local
+  production build: mobile performance 97–99, desktop 100; accessibility, best practices and SEO
+  100 on Home, About, Projects and Contact; CLS 0; mobile home LCP 2.3 s (simulated slow 4G),
+  the others 0.9–1.2 s. Live production (before Phase 1/2 were deployed) scored the same (mobile
+  93–97). The remaining Lighthouse items are left alone on purpose: unused CSS (the single legacy
+  file, see "CSS strategy"), unused or legacy JS inside React and the Next.js runtime, and the
+  render-blocking stylesheet (only `experimental.inlineCss` would remove it). The hero photo is
+  already preloaded with high priority, about 16 KB WebP. axe with WCAG 2.2 AA tags finds no
+  violations on the 7 pages or the 404, at 390 and 1440px, in both themes, and nothing scrolls
+  sideways. There is no field data (CrUX or INP) yet, so nothing is claimed about real users.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git

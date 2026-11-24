@@ -134,7 +134,7 @@ const ALL = [
     name: "projects",
     route: "projects",
     ref: "projects",
-    title: "Projects | Faizan Ali",
+    title: "Projects | Faizan Ali, Full-Stack Developer",
     canonical: "/projects",
     current: "Projects",
   },
@@ -142,7 +142,7 @@ const ALL = [
     name: "detail",
     route: "projects/personal-portfolio",
     ref: "project-detail",
-    title: "Personal Portfolio | Faizan Ali",
+    title: "Personal Portfolio: Next.js Case Study | Faizan Ali",
     canonical: "/projects/personal-portfolio",
     current: "Projects",
   },
@@ -150,7 +150,7 @@ const ALL = [
     name: "experience",
     route: "experience",
     ref: "experience",
-    title: "Experience | Faizan Ali",
+    title: "Experience | Faizan Ali, Software Developer & IT Project Manager",
     canonical: "/experience",
     current: "Experience",
   },
@@ -158,7 +158,7 @@ const ALL = [
     name: "contact",
     route: "contact",
     ref: "contact",
-    title: "Contact | Faizan Ali",
+    title: "Contact Faizan Ali | Software Engineer & IT Project Manager",
     canonical: "/contact",
     current: "Contact",
   },
@@ -166,7 +166,7 @@ const ALL = [
     name: "faq",
     route: "faq",
     ref: "faq",
-    title: "FAQ | Faizan Ali",
+    title: "FAQ | Faizan Ali, Software Engineer & IT Project Manager",
     canonical: "/faq",
     current: "FAQ",
   },
@@ -364,6 +364,9 @@ async function pageChecks(b, page) {
       desc: document.querySelector('meta[name="description"]')?.content,
       canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
       ogTitle: document.querySelector('meta[property="og:title"]')?.content,
+      ogImage: document.querySelector('meta[property="og:image"]')?.content,
+      card: document.querySelector('meta[name="twitter:card"]')?.content,
+      twImage: document.querySelector('meta[name="twitter:image"]')?.content,
       h1: document.querySelectorAll("h1").length,
       labels: [...document.querySelectorAll(".page-section-label")].map(
         (e) => getComputedStyle(e).fontSize,
@@ -375,13 +378,16 @@ async function pageChecks(b, page) {
       text: document.body.innerText + document.documentElement.innerHTML,
     }));
     check(
-      `${page.name}: title, description, canonical link and Open Graph title, with no preview wording`,
+      `${page.name}: title, description, canonical link, Open Graph title and share image, large Twitter card, with no preview wording`,
       m.title === page.title &&
         m.desc &&
         !/preview|demo/i.test(m.desc) &&
         new URL(m.canonical).pathname === page.canonical &&
-        m.ogTitle === page.title,
-      `${m.title} | ${m.canonical} | ${m.ogTitle}`,
+        m.ogTitle === page.title &&
+        new URL(m.ogImage).pathname === "/opengraph-image" &&
+        m.card === "summary_large_image" &&
+        new URL(m.twImage).pathname === "/opengraph-image",
+      `${m.title} | ${m.canonical} | ${m.ogTitle} | ${m.ogImage} | ${m.card}`,
     );
     check(
       `${page.name}: one h1, two main labels at the approved 15px, one hero + one floating header, '${page.current}' current`,
@@ -958,10 +964,61 @@ async function siteChecks(b) {
   {
     const sitemap = await (await req.get(appPage("sitemap.xml"))).text();
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    // Each listed page names its own sitemap URL as its canonical link, and its
+    // structured data (the site graph, then the page's own) describes that URL.
+    const locs = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
+    const SITE = locs[0];
+    const canonicals = [];
+    const pageLd = [];
+    for (const loc of locs) {
+      const page = await (await req.get(appPage(new URL(loc).pathname.slice(1)))).text();
+      canonicals.push(page.match(/<link rel="canonical" href="([^"]+)"/)?.[1]);
+      const blocks = [...page.matchAll(/application\/ld\+json">(.*?)<\/script>/g)].map((m) =>
+        JSON.parse(m[1]),
+      );
+      const [webPage, crumbs] = blocks[1]?.["@graph"] || [];
+      const title = page.match(/<title>(.*?)<\/title>/)?.[1].replace(/&amp;/g, "&");
+      pageLd.push({
+        blocks: blocks.length,
+        type: webPage?.["@type"],
+        url: webPage?.url,
+        site: webPage?.isPartOf?.["@id"],
+        title: webPage?.name === title,
+        crumbs: crumbs?.itemListElement?.map((c) => c.item).join(" "),
+      });
+    }
+    const types = {
+      "/": "WebPage",
+      "/about": "ProfilePage",
+      "/projects": "CollectionPage",
+      "/projects/personal-portfolio": "WebPage",
+      "/experience": "WebPage",
+      "/contact": "ContactPage",
+      "/faq": "FAQPage",
+    };
     check(
-      "sitemap.xml lists the six pages and the case study",
-      JSON.stringify(urls.sort()) === JSON.stringify(ROUTES.map((r) => `/${r}`).sort()),
-      urls.join(" "),
+      "sitemap.xml lists the six pages and the case study; each page's canonical link, page type, structured-data URL and breadcrumbs match it",
+      JSON.stringify(urls.sort()) === JSON.stringify(ROUTES.map((r) => `/${r}`).sort()) &&
+        locs.every((loc, i) => {
+          const path = new URL(loc).pathname;
+          const d = pageLd[i];
+          const trail =
+            path === "/"
+              ? undefined
+              : path === "/projects/personal-portfolio"
+                ? [SITE, `${SITE}/projects`, loc].join(" ")
+                : [SITE, loc].join(" ");
+          return (
+            canonicals[i] === loc &&
+            d.blocks === 2 &&
+            d.type === types[path] &&
+            d.url === loc &&
+            d.site === `${SITE}/#website` &&
+            d.title &&
+            d.crumbs === trail
+          );
+        }),
+      urls.join(" ") + " | " + JSON.stringify(pageLd.map((d, i) => ({ c: canonicals[i], ...d }))),
     );
     const robots = await (await req.get(appPage("robots.txt"))).text();
     check(
@@ -977,11 +1034,17 @@ async function siteChecks(b) {
     );
     const home = await req.get(APP_URL);
     const html = await home.text();
-    const ld = JSON.parse(html.match(/application\/ld\+json">(.*?)<\/script>/)?.[1] || "{}");
+    const graph = JSON.parse(html.match(/application\/ld\+json">(.*?)<\/script>/)?.[1] || "{}");
+    const ld = graph["@graph"]?.find((n) => n["@type"] === "Person") || {};
+    const site = graph["@graph"]?.find((n) => n["@type"] === "WebSite") || {};
     check(
-      "structured data describes Faizan Ali with public details only",
-      ld["@type"] === "Person" &&
+      "structured data describes Faizan Ali and the website with public details only",
+      ld["@id"] === `${SITE}/#person` &&
+        site.url === SITE &&
+        site.publisher?.["@id"] === ld["@id"] &&
         ld.name === "Faizan Ali" &&
+        ld.address?.addressCountry === "PK" &&
+        !/worksFor|award|rating|review|alumniOf|kiosk/i.test(JSON.stringify(graph)) &&
         ld.email === "mailto:faizandevx@gmail.com" &&
         ld.sameAs?.join() ===
           "https://github.com/faizandevx,https://www.linkedin.com/in/faizan-ali-5aa430380" &&

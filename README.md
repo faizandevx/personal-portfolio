@@ -200,6 +200,28 @@ Phase 1 is complete and approved.
 - **Production:** skip link, drawer focus return, custom 404 page (`src/proxy.ts` gives unknown project
   URLs a real 404 status), canonical and Open Graph metadata,
   sitemap, robots, Open Graph image, Person structured data and security headers.
+- **SEO (Phase 1, 2026-11-24):** every indexable page, home included, has a canonical link equal to
+  its `sitemap.xml` URL. Every page shares the Open Graph image with a large Twitter card
+  (`pageMetadata` in `src/lib/site.ts`). The 404 page is `noindex` with status 404.
+- **SEO (Phase 2, 2026-11-24):** each page has its own keyword-relevant title and description, based on
+  visible content only. Open Graph uses the `en_US` locale, and About uses the `profile` type.
+  Structured data (`src/lib/structured-data.ts`): Person and WebSite on every page, plus the
+  page's own type (WebPage, ProfilePage, CollectionPage, ContactPage or FAQPage) and breadcrumbs.
+  The Schema.org validator reports no errors or warnings on any of the 7 pages.
+
+## Performance (lab measurements, 2026-11-25)
+
+Lighthouse 13.6.0, median of 3 runs on the local production build (`next start`):
+
+| Page     | Mobile perf | Desktop perf | A11y / BP / SEO | Mobile LCP | Mobile TBT | CLS |
+| -------- | ----------- | ------------ | --------------- | ---------- | ---------- | --- |
+| Home     | 97          | 100          | 100 / 100 / 100 | 2.3 s      | 150 ms     | 0   |
+| About    | 99          | 100          | 100 / 100 / 100 | 1.2 s      | 120 ms     | 0   |
+| Projects | 99          | 100          | 100 / 100 / 100 | 0.9 s      | 100 ms     | 0   |
+| Contact  | 99          | 100          | 100 / 100 / 100 | 0.9 s      | 130 ms     | 0   |
+
+These are lab results with simulated throttling. They are not field data: there is no Chrome UX
+Report data yet, so INP and real-user Core Web Vitals are unknown.
 
 ## Before and after deployment
 
@@ -211,6 +233,9 @@ The site's public address (canonical links, Open Graph, `sitemap.xml`, `robots.t
    build time). Even the first deployment, and every preview, points to the production address,
    never to localhost.
 3. Locally, `http://localhost:3000`.
+
+Production address: `https://faizanalidevx.vercel.app` (deployed 2026-11-24). It comes from
+`VERCEL_PROJECT_PRODUCTION_URL`; `NEXT_PUBLIC_SITE_URL` is not set.
 
 Once the final address is known, set `NEXT_PUBLIC_SITE_URL` in Vercel (Production and Preview) to
 it, with `https://` and no trailing slash, and redeploy. The value is read at build time.

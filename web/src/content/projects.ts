@@ -4,6 +4,7 @@ export type Project = {
   slug: string;
   type: string; // card label
   title: string;
+  metaTitle: string; // page title, before " | Faizan Ali"
   titleLead: string; // case-study heading, before the accent
   titleAccent: string;
   summary: string;
@@ -19,6 +20,7 @@ export const projects: Project[] = [
     slug: "personal-portfolio",
     type: "Web project",
     title: "Personal Portfolio",
+    metaTitle: "Personal Portfolio: Next.js Case Study",
     titleLead: "Personal",
     titleAccent: "Portfolio.",
     summary:

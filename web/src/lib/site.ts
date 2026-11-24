@@ -16,7 +16,9 @@ export const SITE_URL = (
 export const SITE_NAME = "Faizan Ali";
 export const SITE_TITLE = "Faizan Ali | Software Engineer & IT Project Manager";
 export const SITE_DESCRIPTION =
-  "Faizan Ali is a Software Engineer and IT Project Manager working across full-stack development and digital banking technology delivery.";
+  "Portfolio of Faizan Ali, a Software Engineer and IT Project Manager from Pakistan working across full-stack development and digital banking technology delivery.";
+// Open Graph locale; the pages are in English (<html lang="en">).
+export const OG_LOCALE = "en_US";
 
 export const PUBLIC_EMAIL = "faizandevx@gmail.com";
 export const GITHUB_PROFILE_URL = "https://github.com/faizandevx";
@@ -30,13 +32,40 @@ export const CV_FILE: string | null = "/cv/Faizan_CV.pdf";
 // Indexable routes, also the source of the sitemap.
 export const STATIC_ROUTES = ["/", "/about", "/projects", "/experience", "/contact", "/faq"];
 
-// A page's title, description, canonical link and Open Graph text.
-export function pageMetadata(title: string, description: string, path: string): Metadata {
+// The link-preview image (app/opengraph-image.tsx). The root layout gets it
+// automatically; pages list it again because a page's openGraph and twitter
+// objects replace the layout's whole objects (Next.js merges metadata shallowly).
+const SHARE_IMAGE = {
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  type: "image/png",
+  alt: "Faizan Ali, Software Engineer & IT Project Manager",
+};
+
+// A page's title, description, canonical link, Open Graph and Twitter card. A
+// profile page (About) uses the Open Graph "profile" type with the owner's name.
+export function pageMetadata(
+  title: string,
+  description: string,
+  path: string,
+  { profile = false } = {},
+): Metadata {
+  const openGraph = {
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
+    title,
+    description,
+    url: path,
+    images: [SHARE_IMAGE],
+  };
   return {
     title,
     description,
     alternates: { canonical: path },
-    openGraph: { title, description, url: path },
-    twitter: { title, description },
+    openGraph: profile
+      ? { ...openGraph, type: "profile", firstName: "Faizan", lastName: "Ali" }
+      : { ...openGraph, type: "website" },
+    twitter: { card: "summary_large_image", title, description, images: [SHARE_IMAGE] },
   };
 }
