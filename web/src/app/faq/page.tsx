@@ -15,6 +15,16 @@ export const metadata = pageMetadata(title, description, "/faq");
 export default function FaqPage() {
   return (
     <>
+      <JsonLd
+        data={pageJsonLd({
+          path: "/faq",
+          name: title,
+          description,
+          type: "FAQPage",
+          trail: [["FAQ", "/faq"]],
+          mainEntity: faqEntities,
+        })}
+      />
       <main id="main-content">
         <InsideHero className="faq-inside-hero">
           <div className="container">
@@ -62,16 +72,6 @@ export default function FaqPage() {
           </div>
         </section>
       </main>
-      <JsonLd
-        data={pageJsonLd({
-          path: "/faq",
-          name: title,
-          description,
-          type: "FAQPage",
-          trail: [["FAQ", "/faq"]],
-          mainEntity: faqEntities,
-        })}
-      />
     </>
   );
 }

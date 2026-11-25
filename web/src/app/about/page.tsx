@@ -21,6 +21,16 @@ export const metadata: Metadata = pageMetadata(title, description, "/about", { p
 export default function AboutPage() {
   return (
     <>
+      <JsonLd
+        data={pageJsonLd({
+          path: "/about",
+          name: title,
+          description,
+          type: "ProfilePage",
+          trail: [["About", "/about"]],
+          mainEntity: profileEntity,
+        })}
+      />
       <main id="main-content">
         <InsideHero>
           <AboutHero />
@@ -32,16 +42,6 @@ export default function AboutPage() {
         <EducationSection />
         <AboutCtaSection />
       </main>
-      <JsonLd
-        data={pageJsonLd({
-          path: "/about",
-          name: title,
-          description,
-          type: "ProfilePage",
-          trail: [["About", "/about"]],
-          mainEntity: profileEntity,
-        })}
-      />
     </>
   );
 }

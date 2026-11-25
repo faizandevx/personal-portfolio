@@ -39,6 +39,18 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
 
   return (
     <>
+      <JsonLd
+        data={pageJsonLd({
+          path: `/projects/${project.slug}`,
+          name: `${project.metaTitle} | Faizan Ali`,
+          description: project.summary,
+          trail: [
+            ["Projects", "/projects"],
+            [project.title, `/projects/${project.slug}`],
+          ],
+          mainEntity: projectEntity(project),
+        })}
+      />
       <main id="main-content">
         <InsideHero>
           <div className="container">
@@ -79,18 +91,6 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
           </div>
         </section>
       </main>
-      <JsonLd
-        data={pageJsonLd({
-          path: `/projects/${project.slug}`,
-          name: `${project.metaTitle} | Faizan Ali`,
-          description: project.summary,
-          trail: [
-            ["Projects", "/projects"],
-            [project.title, `/projects/${project.slug}`],
-          ],
-          mainEntity: projectEntity(project),
-        })}
-      />
     </>
   );
 }

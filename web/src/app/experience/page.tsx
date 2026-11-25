@@ -16,6 +16,15 @@ export const metadata = pageMetadata(title, description, "/experience");
 export default function ExperiencePage() {
   return (
     <>
+      <JsonLd
+        data={pageJsonLd({
+          path: "/experience",
+          name: title,
+          description,
+          type: "WebPage",
+          trail: [["Experience", "/experience"]],
+        })}
+      />
       <main id="main-content">
         <InsideHero>
           <div className="container">
@@ -45,15 +54,6 @@ export default function ExperiencePage() {
           </div>
         </section>
       </main>
-      <JsonLd
-        data={pageJsonLd({
-          path: "/experience",
-          name: title,
-          description,
-          type: "WebPage",
-          trail: [["Experience", "/experience"]],
-        })}
-      />
     </>
   );
 }

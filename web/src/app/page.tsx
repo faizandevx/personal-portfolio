@@ -17,6 +17,7 @@ export const metadata = { alternates: { canonical: "/" } };
 export default function Home() {
   return (
     <>
+      <JsonLd data={pageJsonLd({ path: "/", name: SITE_TITLE, description: SITE_DESCRIPTION })} />
       <main id="main-content">
         <section className="hero-zone" data-header-hero id="hero">
           <SiteHeader variant="hero" />
@@ -27,7 +28,6 @@ export default function Home() {
         <ExpertiseSection />
         <HomeContactSection />
       </main>
-      <JsonLd data={pageJsonLd({ path: "/", name: SITE_TITLE, description: SITE_DESCRIPTION })} />
     </>
   );
 }

@@ -243,7 +243,9 @@ intentional differences.
       other pages use `website`.
     - JSON-LD (`lib/structured-data.ts`, rendered by `components/seo/JsonLd.tsx`). The layout's
       `<head>` has a site graph with Person (`/#person`) and WebSite (`/#website`). Each page adds
-      its own graph **after `</main>`**, so the DOM inside `<main>` still matches V21. That graph is
+      its own graph **just before `<main>`**, so the DOM inside `<main>` still matches V21 and the
+      floating header still follows `<main>` (the `about` suite checks this; Phase 5 moved it
+      from after `</main>`). That graph is
       WebPage, ProfilePage (About), CollectionPage (Projects), ContactPage or FAQPage (from
       `content/faq.ts`), plus a BreadcrumbList below the home page. The case study's main entity is
       its public repository (SoftwareSourceCode). Never add ratings, awards, credentials or
@@ -307,6 +309,13 @@ Read this first when resuming after a compaction or in a new session.
   (`verification.google` in `app/layout.tsx`; the token is public by design). Do not remove it.
   Bing Webmaster Tools is set up by importing from Search Console. IndexNow is not used: the site
   rarely changes. Never report indexing, impressions or rankings without Search Console or Bing data.
+- **SEO Phase 5, final verification (2026-11-25).** Full regression: 1,270/1,271 on the first run.
+  The one failure was real: the Phase 2 page JSON-LD sat between `<main>` and the floating header.
+  It now renders just before `<main>`, and the rerun of `about`, `homepage` and `pages` passed
+  510/510. Lint, typecheck, format, build and the production smoke test pass, and
+  `npm audit` (production dependencies) finds 0 vulnerabilities. Logs are in
+  `.local/phase5-logs/`. Search Console and Bing have the sitemap; indexing is not yet confirmed.
+  There is still no CSP (see Phase 6 shell); that is a known, accepted gap.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git

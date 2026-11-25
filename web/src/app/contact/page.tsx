@@ -15,6 +15,15 @@ export const metadata = pageMetadata(title, description, "/contact");
 export default function ContactPage() {
   return (
     <>
+      <JsonLd
+        data={pageJsonLd({
+          path: "/contact",
+          name: title,
+          description,
+          type: "ContactPage",
+          trail: [["Contact", "/contact"]],
+        })}
+      />
       <main id="main-content">
         <InsideHero>
           <div className="container">
@@ -53,15 +62,6 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
-      <JsonLd
-        data={pageJsonLd({
-          path: "/contact",
-          name: title,
-          description,
-          type: "ContactPage",
-          trail: [["Contact", "/contact"]],
-        })}
-      />
     </>
   );
 }
