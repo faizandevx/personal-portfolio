@@ -270,7 +270,7 @@ is ever shown as working:
 - **Professional photos (integrated 2026-11-23):** `web/public/images/faizan-ali-hero.png` (blue
   suit) fills the home hero frame, and `web/public/images/faizan-ali-about.png` (grey suit) sits in
   the About "At a glance" card. They are set in `src/content/photos.ts` and served by `next/image`.
-- **CV (integrated 2026-11-23):** `web/public/cv/Faizan_CV.pdf` is the original file, and it is set as
+- **CV (integrated 2026-11-23):** `web/public/cv/Faizan-Ali-CV.pdf` is the original file, and it is set as
   `CV_FILE` in `src/lib/site.ts`. Every CV button opens the CV modal, whose "Download PDF" link
   saves it as `Faizan-Ali-CV.pdf`. FAQ #5 points to it.
 - **LinkedIn (integrated 2026-11-24):** `https://www.linkedin.com/in/faizan-ali-5aa430380` is linked

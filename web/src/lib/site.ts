@@ -27,7 +27,7 @@ export const LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/faizan-ali-5aa4
 
 // The CV PDF under web/public/ (the original file, unedited; it downloads as
 // Faizan-Ali-CV.pdf). If set to null, the CV modal says the CV isn't available yet.
-export const CV_FILE: string | null = "/cv/Faizan_CV.pdf";
+export const CV_FILE: string | null = "/cv/Faizan-Ali-CV.pdf";
 
 // Indexable routes, also the source of the sitemap.
 export const STATIC_ROUTES = ["/", "/about", "/projects", "/experience", "/contact", "/faq"];

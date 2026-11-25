@@ -1418,7 +1418,7 @@ const ok = (d) => !d.sizeMismatch && d.diff / d.total <= 0.01;
       "#cv-preview cv-trigger:true",
       "#my-story 200 #my-story:true",
       // The CV PDF in the CV modal (change 24).
-      "/cv/Faizan_CV.pdf 200",
+      "/cv/Faizan-Ali-CV.pdf 200",
       "/#home-skills 200 #home-skills:true",
       "/about#education 200 #education:true",
     ];

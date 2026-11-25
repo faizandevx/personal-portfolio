@@ -34,7 +34,7 @@ const ROUTES = [
   "#home-about",
   "#cv-preview",
   // The CV PDF, linked from the CV modal (change 24).
-  "/cv/Faizan_CV.pdf",
+  "/cv/Faizan-Ali-CV.pdf",
 ];
 const V21_ROUTE = {
   "index.html": "/",
@@ -84,7 +84,7 @@ async function open(b, url, o = {}) {
       });
       // Approved 2026-11-23 (change 24): the CV modal's "Close" and "Download PDF".
       document.querySelector("#cvModal .modal-actions").innerHTML =
-        '<button class="btn btn-secondary" type="button" data-close-cv="">Close</button><a class="btn btn-primary" href="/cv/Faizan_CV.pdf" download="Faizan-Ali-CV.pdf" type="application/pdf" data-cv-download="">Download PDF <span aria-hidden="true">↓</span></a>';
+        '<button class="btn btn-secondary" type="button" data-close-cv="">Close</button><a class="btn btn-primary" href="/cv/Faizan-Ali-CV.pdf" download="Faizan-Ali-CV.pdf" type="application/pdf" data-cv-download="">Download PDF <span aria-hidden="true">↓</span></a>';
     });
   await p.waitForTimeout(300);
   return p;

@@ -188,9 +188,12 @@ intentional differences.
 23. 404 on tall screens. The hero grows so the footer reaches the bottom of the window. It is
     scoped with `body:has(> main.not-found-main:not([style*="display: none"]))`, because a hidden
     404 stays in the DOM after client-side navigation.
-24. CV download (approved 2026-11-23). The user's original PDF is `web/public/cv/Faizan_CV.pdf`
+24. CV download (approved 2026-11-23). The user's original PDF is `web/public/cv/Faizan-Ali-CV.pdf`
     (one page, 69,075 bytes, SHA-256 `d90f308d…`). Never edit or replace it. `CV_FILE` in
-    `lib/site.ts` points to it.
+    `lib/site.ts` points to it. It was renamed from `Faizan_CV.pdf` on 2026-11-25 (contents
+    unchanged): Vercel serves PDFs with `Content-Disposition: inline; filename="<file name>"`, and
+    Chrome takes that name over the link's `download` attribute. Keep the file name and the
+    `download` attribute the same.
     - Every CV button (navbar, floating navbar, hero, mobile drawer, Experience) opens the V21 CV
       modal, which now reads "Download CV (PDF)".
     - The modal has a secondary "Close" button and a primary "Download PDF" link on the right,

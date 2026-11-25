@@ -222,15 +222,17 @@ const toBottom = (p) =>
       text: m.innerText,
     };
   });
+  // The file itself is named Faizan-Ali-CV.pdf, like the download attribute: Vercel serves
+  // PDFs with Content-Disposition naming the file, and Chrome prefers that name.
   check(
-    "one download link: the CV PDF, saved as Faizan-Ali-CV.pdf",
-    c.links.join() === "/cv/Faizan_CV.pdf Faizan-Ali-CV.pdf application/pdf" &&
+    "one download link: the CV PDF, file and saved name both Faizan-Ali-CV.pdf",
+    c.links.join() === "/cv/Faizan-Ali-CV.pdf Faizan-Ali-CV.pdf application/pdf" &&
       !/not available|coming soon/i.test(c.text),
     c.links.join(),
   );
   {
     const original = require("node:fs").readFileSync(
-      require("node:path").join(WEB_DIR, "public", "cv", "Faizan_CV.pdf"),
+      require("node:path").join(WEB_DIR, "public", "cv", "Faizan-Ali-CV.pdf"),
     );
     await p.click(".floating-header .cv-btn");
     await p.waitForTimeout(250);
@@ -244,6 +246,12 @@ const toBottom = (p) =>
       "'Download PDF' downloads the original PDF byte for byte, then the modal closes",
       download.suggestedFilename() === "Faizan-Ali-CV.pdf" &&
         file.equals(original) &&
+        // The approved, unedited CV (2026-11-23).
+        require("node:crypto")
+          .createHash("sha256")
+          .update(original)
+          .digest("hex")
+          .startsWith("d90f308d85f68955") &&
         !(await state(p)).open,
       `${download.suggestedFilename()} ${file.length} bytes (original ${original.length})`,
     );
