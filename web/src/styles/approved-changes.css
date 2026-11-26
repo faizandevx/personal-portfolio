@@ -32,6 +32,10 @@
   gap: 12px;
   margin-top: 20px;
 }
+/* 2026-11-25: Experience "View CV" + "Download CV", where V21's single button sat. */
+.project-actions.experience-cv-actions {
+  margin-top: 0;
+}
 
 /*
  * Phase 6: keyboard users can jump past the navigation. Off-screen until it
@@ -283,4 +287,51 @@ main.not-found-main > .not-found-hero {
 .about-glance-photo img.profile-photo {
   object-fit: cover;
   object-position: 50% 6%;
+}
+
+/*
+ * WhatsApp and contact (approved 2026-11-26). V21's "Let's Chat" button is now a
+ * wa.me link, so its icon keeps V21's `.contact-showcase-actions button svg` rule.
+ * The Contact page's WhatsApp card is a link too: it lifts 2px on hover like the
+ * contact-method cards, and its pill brightens. The form's "Copy email address"
+ * button reads like the employer links (bold, orange on hover and focus).
+ */
+.contact-showcase-actions .whatsapp-preview-trigger svg {
+  flex: none;
+}
+a.connect-feature {
+  display: block;
+  transition: transform 0.25s ease;
+}
+a.connect-feature:hover {
+  transform: translateY(-2px);
+}
+a.connect-feature .soon-tag {
+  transition: background-color 0.22s ease;
+}
+a.connect-feature:hover .soon-tag,
+a.connect-feature:focus-visible .soon-tag {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+.form-status .copy-email {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.22s ease;
+}
+.form-status .copy-email:hover,
+.form-status .copy-email:focus-visible {
+  color: var(--orange);
+}
+@media (prefers-reduced-motion: reduce) {
+  a.connect-feature,
+  a.connect-feature .soon-tag,
+  .form-status .copy-email {
+    transition: none;
+  }
 }

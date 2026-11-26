@@ -4,8 +4,8 @@ import WhatsAppChat from "@/components/home/WhatsAppChat";
 
 // The V21 home "Contact" section (design-reference/index.html, #home-contact).
 // Approved Phase 2 change: the label has no "04 /" prefix and uses the larger
-// home-section-label size. The WhatsApp button and the Ask Faizan AI card are
-// honest placeholders until a public number and a real assistant exist.
+// home-section-label size. "Let's Chat" opens a WhatsApp chat with the approved
+// public number; the Ask Faizan AI card is a scripted demo until a real assistant exists.
 export default function HomeContactSection() {
   return (
     <section

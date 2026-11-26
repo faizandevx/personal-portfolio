@@ -20,7 +20,10 @@ const { WEB_DIR, APP_URL, REFERENCE_URL, CHANNEL } = require("./harness.cjs");
 // suite itself, and say why in the change description.
 const SUITES = [
   // 88 checks from Step 2D + 1 for the approved "no kiosks" content correction.
-  ["contact", 89, "Phase 2D: Contact section, Ask Faizan AI, WhatsApp modal"],
+  // 89 checks until 2026-11-26, when "Let's Chat" became a WhatsApp link: the 29 modal
+  // checks became 13 link checks (attributes, new tab, keyboard, hover/focus, number
+  // consistency, AI answer), and axe no longer has a modal to scan.
+  ["contact", 73, "Phase 2D: Contact section, Ask Faizan AI, WhatsApp link"],
   ["work-skills", 72, "Phase 2C: Selected work + Expertise"],
   ["about", 87, "Phase 2B: About section and Tech Visual"],
   ["company-links", 44, "Phase 2B: AlphaSoft360 / Aman Bank links"],
@@ -45,10 +48,11 @@ const SUITES = [
     "Phase 3: /about page (3B hero + workflow visual; 3C story, at a glance, career journey; 3D capabilities, approach, education, CTA; 3E whole page)",
   ],
   // 369 checks from Phases 4-6 + 2 for the approved 2026-11-23 fixes (Contact hero
-  // label wrapping, 404 footer on tall screens).
+  // label wrapping, 404 footer on tall screens) + 2 for the 2026-11-26 WhatsApp card
+  // (hover and focus) and the form's "Copy email address" fallback.
   [
     "pages",
-    371,
+    373,
     "Phases 4-6: /projects, case study, /experience, /contact, /faq vs V21; skip link, 404, SEO files, headers",
   ],
 ];

@@ -175,11 +175,12 @@ async function open(b, url, o = {}) {
       external.map((l) => l.href).join(", "),
     );
     check(
-      "only approved external sites (GitHub and LinkedIn profiles, AlphaSoft360, Aman Bank)",
+      "only approved external sites (GitHub and LinkedIn profiles, AlphaSoft360, Aman Bank, WhatsApp chat)",
       external.every((l) =>
         [
           "https://github.com/faizandevx",
           "https://www.linkedin.com/in/faizan-ali-5aa430380",
+          "https://wa.me/923473057550",
           "https://www.alphasoft360.com/",
           "https://www.aman-bank.com/",
         ].includes(l.href),
@@ -266,12 +267,7 @@ async function open(b, url, o = {}) {
       return stops;
     };
     const [ref, app] = [await open(b, REF, { width }), await open(b, APP, { width })];
-    // Approved accessible-name change (CLAUDE.md, change 8), applied to V21 before reading.
-    await ref.evaluate(() =>
-      document
-        .querySelector(".whatsapp-preview-trigger")
-        .setAttribute("aria-label", "Let's Chat on WhatsApp (coming soon)"),
-    );
+    // "Let's Chat" is the approved WhatsApp link in both (harness.cjs, change 30).
     const [ro, ao] = [await order(ref), await order(app)];
     const approved = ['main a "AlphaSoft360"', 'main a "Aman Bank"'];
     const appIds = ao.map((s) => s.id).filter((id) => !approved.includes(id));
@@ -341,8 +337,8 @@ async function open(b, url, o = {}) {
       p.evaluate(() => {
         const out = [];
         for (const e of document.querySelectorAll("body *")) {
-          // The WhatsApp modal only exists while open in the app (V21 keeps it hidden in
-          // the page); the contact suite compares it opened. next-route-announcer is
+          // V21 keeps its unused "coming soon" WhatsApp modal hidden in the page; the app
+          // has none since "Let's Chat" became a WhatsApp link. next-route-announcer is
           // Next.js's invisible screen-reader route announcer (framework, not design).
           if (
             e.closest(

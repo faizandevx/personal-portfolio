@@ -17,8 +17,9 @@ See `README.md` for commands and phase status.
    The site has one navigation bar. Like the reference, it is rendered as a hero header that
    glides away and a floating header that slides in after the hero. That two-stage behaviour is
    the approved sticky behaviour.
-5. **No fake functionality.** Demo-only features (CV download, WhatsApp, contact delivery, AI)
-   must be clearly marked as unavailable or scripted until they are really connected.
+5. **No fake functionality.** Demo-only features (contact delivery, AI) must be clearly marked as
+   unavailable or scripted until they are really connected. The CV download and WhatsApp are
+   connected (changes 24 and 30).
 6. **No confidential data.** Never publish private repository URLs, client or banking
    implementation details, internal names, or credentials. Private projects get summaries only.
 7. **Keep the docs accurate.** Update `README.md` (phase status, commands, structure) and this
@@ -59,7 +60,7 @@ and second-photo panel, the photo-upload controls, and "design preview" disclaim
 
 Approved UI that is kept: the CV button, the WhatsApp button, the scripted "Ask Faizan AI" card
 (labelled as scripted), the contact form, and the photo panel frame. Each one gets honest
-not-yet-available behaviour.
+not-yet-available behaviour until it is connected (CV: change 24, WhatsApp: change 30).
 
 ## Approved design changes (apply only in the named phase)
 
@@ -102,12 +103,13 @@ intentional differences.
 
 8. Home Contact wording (approved 2026-11-03). This replaces review-only text with honest text
    for visitors:
-   - **WhatsApp modal body:** "WhatsApp chat isn't available yet. In the meantime, you're welcome
-     to get in touch through the Contact page or by email at faizandevx@gmail.com."
+   - **WhatsApp modal body** (until change 30 removed the modal): "WhatsApp chat isn't available
+     yet. In the meantime, you're welcome to get in touch through the Contact page or by email at
+     faizandevx@gmail.com."
    - **Ask Faizan AI subtitle:** "Portfolio guide · Scripted demo".
-   - **Hidden accessible labels:** "Let's Chat on WhatsApp (coming soon)" and "Ask Faizan AI
-     (scripted demo)".
-   - Never add a WhatsApp number, a `wa.me` link or a live AI call without approval.
+   - **Hidden accessible labels:** "Ask Faizan AI (scripted demo)", and "Let's Chat on WhatsApp
+     (coming soon)" until change 30.
+   - Never add a live AI call, or any WhatsApp number other than change 30's, without approval.
 
 **Phase 6: homepage accessibility** (approved 2026-11-03)
 
@@ -168,7 +170,8 @@ intentional differences.
 19. Projects (`content/projects.ts`). Only Personal Portfolio is shown, as one full-width wide card
     (`.bento-grid-single`). The case study has Overview, Architecture, Results and a link to the public
     repository, and no screenshot panel until real screenshots exist. New labels use
-    `.page-section-label` (15px). Experience uses V21's text with AlphaSoft360, names as plain text.
+    `.page-section-label` (15px). Experience uses V21's text with AlphaSoft360 (employer names are
+    links since change 29).
 20. Contact and FAQ. No mail service or credentials exist, so the form validates and then opens the
     visitor's own email app with a prefilled message; it never claims a message was sent. FAQ answers
     that described the preview are reworded (`content/faq.ts`), and each answer is a named region.
@@ -200,7 +203,7 @@ intentional differences.
       where V21's button was. The link downloads the file as `Faizan-Ali-CV.pdf`. Focus starts on
       it, and the modal closes as the download starts.
     - FAQ #5 now explains where to download the CV.
-    - WhatsApp stays inactive until a verified number is supplied.
+    - WhatsApp stayed inactive until the number was approved (change 30).
 25. Professional photos (approved 2026-11-23). They are the user's own unedited files in
     `web/public/images/`: `faizan-ali-hero.png` (blue suit, 1070×1470) and
     `faizan-ali-about.png` (grey suit, 1122×1402). They are set in `content/photos.ts` and
@@ -254,6 +257,38 @@ intentional differences.
       its public repository (SoftwareSourceCode). Never add ratings, awards, credentials or
       employers (`worksFor`) to it; the `pages` suite checks for them.
 
+29. Experience page (approved 2026-11-25).
+    - Timeline employer names ("Aman Bank", "AlphaSoft360") use `ui/EmployerLink`, like Home and
+      About: same URLs, new tab, `rel="noopener noreferrer"`, hidden "(opens in a new tab)", orange
+      on hover and focus. Role titles stay plain text. This replaces "plain-text employer names on
+      the timeline".
+    - The single V21 "Download CV" button became a `.project-actions.experience-cv-actions` row (no
+      extra top margin): a primary "View CV ↗" link to `CV_FILE` in a new tab (no `download`
+      attribute; Vercel serves the PDF `inline`, so it opens in the browser's viewer), then V21's
+      secondary "Download CV", which still opens the CV modal. The buttons wrap on narrow screens.
+    - `pages.regression.cjs` applies the same markup to V21 and checks links, hover, the new tab
+      and the layout.
+
+30. WhatsApp and contact (approved 2026-11-26). The user approved the public number
+    **+92 347 3057550** (`WHATSAPP_NUMBER`) and `https://wa.me/923473057550` (`WHATSAPP_URL`), both in
+    `lib/site.ts`. wa.me opens the app on a phone and offers WhatsApp Web or the desktop app on a
+    computer. No message is prefilled or sent, and no WhatsApp API or paid service is used. Every
+    WhatsApp link opens in a new tab with `rel="noopener noreferrer"`.
+    - Home "Let's Chat" (`home/WhatsAppChat.tsx`) is a link with V21's button look, hover and focus;
+      V21's "coming soon" modal is gone. Accessible name: "Let's Chat on WhatsApp, +92 347 3057550
+      (opens in a new tab)". Its icon keeps `flex: none` (V21's rule targeted `button svg`).
+    - Contact: the orange "Prefer a quick chat?" card is the WhatsApp link. It says it opens the app on
+      a phone or WhatsApp Web on a computer, and shows the number with a "Chat on WhatsApp" pill (V21's
+      `.soon-tag` style). It lifts 2px on hover like the contact-method cards, and the pill brightens.
+    - Ask Faizan AI's contact answer and FAQ #6 give the number (FAQ #6 also feeds the FAQPage JSON-LD).
+      Person JSON-LD is unchanged (no `telephone`).
+    - Contact form: still `mailto:` only. After a valid submit, the status message keeps the visible
+      address and adds a "Copy email address" button ("Address copied" on success) for visitors with no
+      email app. It never says a message was sent.
+    - Tests: `harness.cjs` turns V21's button into the same link; `contact` checks the link, new tab,
+      keyboard, hover and focus against V21, and that every WhatsApp link and number on the site is
+      the approved one; `pages` applies the card markup to V21 and checks the card and the copy button.
+
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
 `display:none`, so tests after client-side navigation must target visible elements (`h1:visible`).
@@ -284,9 +319,9 @@ Read this first when resuming after a compaction or in a new session.
 - **Final pre-deployment improvements (started 2026-11-23):** Contact label and 404 fixes, the CV
   download, both professional photos and LinkedIn (changes 22–26). The full regression run waits until the
   final assets are integrated. Commit, push and deploy still need explicit approval.
-- **Regression totals:** 1,271 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 371. Run only the affected suites during a step
+- **Regression totals:** 1,257 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 373, `contact` is 73. Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
-- **External details still needed:** WhatsApp number, mail provider and
+- **External details still needed:** mail provider (optional) and
   the final domain for `NEXT_PUBLIC_SITE_URL` (optional on Vercel; see README). Phases 4–7 are complete and pushed. Deploy only after the user
   approves.
 - **Deployment preparation (2026-11-24):** Next.js was upgraded from 16.4.3 to 16.4.6 (approved patch for 7
@@ -318,7 +353,21 @@ Read this first when resuming after a compaction or in a new session.
   510/510. Lint, typecheck, format, build and the production smoke test pass, and
   `npm audit` (production dependencies) finds 0 vulnerabilities. Logs are in
   `.local/phase5-logs/`. Search Console and Bing have the sitemap; indexing is not yet confirmed.
-  There is still no CSP (see Phase 6 shell); that is a known, accepted gap.
+  There was no CSP then; see the next item.
+- **Production compatibility and security hardening (2026-11-25).** `next.config.ts` adds a minimal
+  `Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'` next to the
+  other headers (`X-Frame-Options: DENY` stays for older browsers; Vercel adds HSTS). Never add
+  `script-src`/`style-src` with nonces: they would break partial prerendering. On the production
+  build there are no CSP violations or browser errors across navigation, themes, the drawer and the
+  CV modal, another origin cannot frame the site, and Chrome's PDF viewer still shows the CV. CV:
+  Vercel sends the PDF `inline; filename="Faizan-Ali-CV.pdf"` (`next start` sends no
+  `Content-Disposition`), so "View CV" opens it in the browser and the modal's `download` link saves
+  `Faizan-Ali-CV.pdf` in both. The `pages` suite checks the CSP header (count unchanged).
+- **WhatsApp integration and contact experience (2026-11-26):** change 30. Targeted runs only:
+  `contact` 73/73, `homepage` 52/52, `pages` 373/373, plus lint, typecheck, format and build.
+- **Combined release (approved 2026-11-26):** changes 29 and 30 and the CSP in one signed commit.
+  Full regression before it: 1,257/1,257 (`npm run test:regression -- --jobs 2`, 33 min); lint,
+  typecheck, format, build pass, and `npm audit --omit=dev` finds 0 vulnerabilities.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git

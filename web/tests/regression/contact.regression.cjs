@@ -1,4 +1,4 @@
-// Phase 2 Step 2D: home Contact section, Ask Faizan AI, WhatsApp modal vs V21.
+// Phase 2 Step 2D: home Contact section, Ask Faizan AI, WhatsApp link vs V21.
 // Run with: npm run test:regression (see tests/regression/README.md)
 const {
   launch,
@@ -15,8 +15,12 @@ const APP = APP_URL,
 const SHOTS = SHOTS_DIR;
 const WIDTHS = [1440, 1280, 1024, 900, 768, 620, 390, 360];
 const APPROVED = fs.readFileSync(WEB_DIR + "/src/styles/approved-changes.css", "utf8");
-const WA_TEXT =
-  "WhatsApp chat isn't available yet. In the meantime, you're welcome to get in touch through the Contact page or by email at faizandevx@gmail.com.";
+// The approved public WhatsApp number (2026-11-26, CLAUDE.md change 30).
+const WA_URL = "https://wa.me/923473057550";
+const WA_NUMBER = "+92 347 3057550";
+const V21_CONTACT_ANSWER =
+  "You can reach Faizan through the Contact page by email, or use Let’s Chat on WhatsApp once a professional contact number is connected.";
+const CONTACT_ANSWER = `You can reach Faizan by email through the Contact page, or use Let’s Chat to message him on WhatsApp at ${WA_NUMBER}.`;
 let failures = 0;
 const check = (n, ok, d = "") => {
   if (!ok) failures++;
@@ -46,32 +50,33 @@ async function open(b, url, o = {}) {
   if (url === REF && !o.pureV21) {
     // The approved Phase 2 changes applied to V21, so comparisons measure everything else.
     await p.addStyleTag({ content: APPROVED });
-    await p.evaluate((WA_TEXT) => {
-      const s = document.getElementById("home-contact");
-      const label = s.querySelector(".contact-showcase-copy > .eyebrow");
-      label.textContent = label.textContent.replace(/^0\d \/ /, "");
-      label.classList.add("home-section-label");
-      s.querySelectorAll('a[href="contact.html"]').forEach((a) =>
-        a.setAttribute("href", "/contact"),
-      );
-      const wa = s.querySelector(".whatsapp-preview-trigger");
-      wa.setAttribute("aria-label", "Let's Chat on WhatsApp (coming soon)");
-      wa.setAttribute("aria-haspopup", "dialog");
-      s.querySelector(".mini-ai-preview").setAttribute(
-        "aria-label",
-        "Ask Faizan AI (scripted demo)",
-      );
-      s.querySelector(".mini-ai-identity small").textContent = "Portfolio guide · Scripted demo";
-      const box = document.querySelector(".whatsapp-preview-box p");
-      if (box) box.textContent = WA_TEXT;
-      // Approved content correction: no "kiosks" in the banking answer. V21's app.js
-      // writes the answer on each click, so it is corrected as soon as it is written.
-      const answer = document.getElementById("miniAiAnswer");
-      new MutationObserver(() => {
-        if (answer.textContent.includes(" kiosks,"))
-          answer.textContent = answer.textContent.replace(" kiosks,", "");
-      }).observe(answer, { childList: true, characterData: true, subtree: true });
-    }, WA_TEXT);
+    await p.evaluate(
+      ([V21_CONTACT_ANSWER, CONTACT_ANSWER]) => {
+        const s = document.getElementById("home-contact");
+        const label = s.querySelector(".contact-showcase-copy > .eyebrow");
+        label.textContent = label.textContent.replace(/^0\d \/ /, "");
+        label.classList.add("home-section-label");
+        s.querySelectorAll('a[href="contact.html"]').forEach((a) =>
+          a.setAttribute("href", "/contact"),
+        );
+        // "Let's Chat" is already the approved WhatsApp link (harness.cjs).
+        s.querySelector(".mini-ai-preview").setAttribute(
+          "aria-label",
+          "Ask Faizan AI (scripted demo)",
+        );
+        s.querySelector(".mini-ai-identity small").textContent = "Portfolio guide · Scripted demo";
+        // Approved content corrections: no "kiosks" in the banking answer, and the
+        // contact answer gives the WhatsApp number. V21's app.js writes the answer on
+        // each click, so it is corrected as soon as it is written.
+        const answer = document.getElementById("miniAiAnswer");
+        new MutationObserver(() => {
+          if (answer.textContent.includes(" kiosks,"))
+            answer.textContent = answer.textContent.replace(" kiosks,", "");
+          if (answer.textContent === V21_CONTACT_ANSWER) answer.textContent = CONTACT_ANSWER;
+        }).observe(answer, { childList: true, characterData: true, subtree: true });
+      },
+      [V21_CONTACT_ANSWER, CONTACT_ANSWER],
+    );
   }
   await p.waitForTimeout(300);
   return p;
@@ -243,16 +248,6 @@ const ai = (p) =>
       )
       .join(" "),
   }));
-const wa = (p) =>
-  p.evaluate(() => {
-    const m = document.querySelector(".whatsapp-preview-backdrop");
-    return {
-      open: !!m && m.classList.contains("open") && getComputedStyle(m).display === "grid",
-      focus: document.activeElement?.textContent?.trim().slice(0, 30),
-      focusInModal: !!m && m.contains(document.activeElement),
-      overflow: getComputedStyle(document.documentElement).overflow,
-    };
-  });
 
 (async () => {
   const b = await launch();
@@ -483,174 +478,139 @@ const wa = (p) =>
       );
     }
 
-  console.log("\n=== 5. WhatsApp modal ===");
+  console.log("\n=== 5. WhatsApp link (approved 2026-11-26) ===");
   for (const width of [1440, 390]) {
+    // wa.me is answered locally, so the test never contacts WhatsApp.
     const q = await open(b, APP, { width });
+    const ctx = q.context();
+    await ctx.route("https://wa.me/**", (r) =>
+      r.fulfill({ contentType: "text/html", body: "<title>wa.me</title>" }),
+    );
     const url = q.url();
-    await q.locator(".whatsapp-preview-trigger").scrollIntoViewIfNeeded();
-    const y0 = await q.evaluate(() => scrollY);
-    await q.click(".whatsapp-preview-trigger");
-    await q.waitForTimeout(200);
-    let s = await wa(q);
-    const dlg = await q.evaluate(() => {
-      const m = document.querySelector(".whatsapp-preview-backdrop");
-      return {
-        role: m.getAttribute("role"),
-        modal: m.getAttribute("aria-modal"),
-        name: document.getElementById(m.getAttribute("aria-labelledby"))?.textContent,
-        desc: document
-          .getElementById(m.getAttribute("aria-describedby"))
-          ?.textContent.replace(/\s+/g, " ")
-          .trim(),
-        parent: m.parentElement.tagName,
-        afterFooter:
-          (document.querySelector("footer").compareDocumentPosition(m) &
-            Node.DOCUMENT_POSITION_FOLLOWING) !==
-          0,
-      };
-    });
-    check(
-      `@${width}: opens; focus moves to 'Got it'; background scroll locked; URL unchanged`,
-      s.open && s.focus === "Got it" && s.overflow === "hidden" && q.url() === url,
-      JSON.stringify(s),
-    );
-    check(
-      `@${width}: dialog semantics (role, aria-modal, named by its heading, described by its text), attached to <body> after the footer as in V21`,
-      dlg.role === "dialog" &&
-        dlg.modal === "true" &&
-        dlg.name === "WhatsApp connection coming soon" &&
-        dlg.desc === WA_TEXT &&
-        dlg.parent === "BODY" &&
-        dlg.afterFooter,
-      JSON.stringify(dlg),
-    );
-    await q.mouse.wheel(0, 600);
-    await q.waitForTimeout(300);
-    check(
-      `@${width}: background does not scroll while open`,
-      (await q.evaluate(() => scrollY)) === y0,
-    );
-    for (let i = 0; i < 3; i++) await q.keyboard.press("Tab");
-    await q.keyboard.press("Shift+Tab");
-    check(`@${width}: Tab / Shift+Tab stay inside the dialog`, (await wa(q)).focusInModal);
-    await q.keyboard.press("Escape");
-    await q.waitForTimeout(200);
-    s = await wa(q);
-    check(
-      `@${width}: Escape closes; focus returns to 'Let's Chat'; scroll unlocked`,
-      !s.open &&
-        (await q.evaluate(() =>
-          document.activeElement?.classList.contains("whatsapp-preview-trigger"),
-        )) &&
-        s.overflow !== "hidden",
-      JSON.stringify(s),
-    );
-    await q.keyboard.press("Enter");
-    await q.waitForTimeout(200);
-    check(`@${width}: keyboard Enter on 'Let's Chat' opens it`, (await wa(q)).open);
-    await q.click(".whatsapp-preview-box h3");
-    await q.waitForTimeout(150);
-    check(`@${width}: click inside the box does not close it`, (await wa(q)).open);
-    await q.mouse.click(5, 300);
-    await q.waitForTimeout(200);
-    check(`@${width}: backdrop click closes it`, !(await wa(q)).open);
-    await q.click(".whatsapp-preview-trigger");
-    await q.waitForTimeout(150);
-    await q.click(".whatsapp-preview-close");
-    await q.waitForTimeout(200);
-    check(
-      `@${width}: 'Got it' closes it and focus returns`,
-      !(await wa(q)).open &&
-        (await q.evaluate(() =>
-          document.activeElement?.classList.contains("whatsapp-preview-trigger"),
-        )),
-    );
-    const leaks = await q.evaluate(() => ({
-      wa: [...document.querySelectorAll("a[href]")]
-        .map((a) => a.href)
-        .filter((h) => /wa\.me|whatsapp|tel:/i.test(h)),
-      phone: /\+?\d[\d\s-]{8,}\d/.test(document.body.innerText),
+    const link = q.locator("#home-contact .whatsapp-preview-trigger");
+    const attrs = await link.evaluate((a) => ({
+      tag: a.tagName,
+      href: a.getAttribute("href"),
+      target: a.target,
+      rel: a.rel,
+      name: a.getAttribute("aria-label"),
+      popup: a.getAttribute("aria-haspopup"),
+      text: a.textContent.replace(/\s+/g, " ").trim(),
     }));
     check(
-      `@${width}: no WhatsApp/tel link and no phone number anywhere`,
-      leaks.wa.length === 0 && !leaks.phone,
-      JSON.stringify(leaks),
+      `@${width}: 'Let's Chat' links to ${WA_URL} in a new tab (noopener noreferrer); its name starts with the visible text and gives the number`,
+      attrs.tag === "A" &&
+        attrs.href === WA_URL &&
+        attrs.target === "_blank" &&
+        attrs.rel === "noopener noreferrer" &&
+        attrs.name === `Let's Chat on WhatsApp, ${WA_NUMBER} (opens in a new tab)` &&
+        attrs.popup === null &&
+        attrs.text === "Let's Chat ↗",
+      JSON.stringify(attrs),
     );
+    await link.scrollIntoViewIfNeeded();
+    const [tab] = await Promise.all([ctx.waitForEvent("page"), link.click()]);
+    await tab.waitForLoadState();
+    check(
+      `@${width}: click opens wa.me in a new tab (no prefilled message); this page stays put with no dialog`,
+      tab.url() === WA_URL &&
+        q.url() === url &&
+        (await q.locator('[role="dialog"]:visible, .whatsapp-preview-backdrop').count()) === 0,
+      tab.url(),
+    );
+    await tab.close();
+    await link.focus();
+    const [tab2] = await Promise.all([ctx.waitForEvent("page"), q.keyboard.press("Enter")]);
+    await tab2.waitForLoadState();
+    check(`@${width}: keyboard Enter opens the same chat`, tab2.url() === WA_URL, tab2.url());
+    await tab2.close();
     check(`@${width}: no console errors`, q.errs.length === 0, q.errs.join(" | "));
-    await q.context().close();
+    await ctx.close();
+  }
+  for (const theme of ["dark", "light"]) {
+    // Hover and keyboard focus look like V21's button (same lift, colours and outline).
+    const res = {};
+    for (const [k, url] of [
+      ["ref", REF],
+      ["app", APP],
+    ]) {
+      const q = await open(b, url, { theme, motion: "no-preference" });
+      const sel = "#home-contact .whatsapp-preview-trigger";
+      const look = () =>
+        q.locator(sel).evaluate((e) => {
+          const c = getComputedStyle(e);
+          return `${c.transform} ${c.backgroundColor} ${c.color} ${c.boxShadow} ${c.outlineStyle} ${c.outlineColor} ${c.outlineWidth} ${c.outlineOffset}`;
+        });
+      await q.locator(sel).scrollIntoViewIfNeeded();
+      await q.hover(sel);
+      await q.waitForTimeout(400);
+      const hover = await look();
+      await q.mouse.move(1, 1);
+      // Reach the link with the keyboard, so :focus-visible applies as for a visitor.
+      await q.locator(sel).focus();
+      await q.keyboard.press("Shift+Tab");
+      await q.keyboard.press("Tab");
+      await q.waitForTimeout(400);
+      res[k] = { hover, focus: await look() };
+      await q.context().close();
+    }
+    check(
+      `${theme}: 'Let's Chat' hover and keyboard-focus styles match V21's button`,
+      JSON.stringify(res.ref) === JSON.stringify(res.app),
+      `V21 ${JSON.stringify(res.ref)} app ${JSON.stringify(res.app)}`,
+    );
   }
   {
+    // Number consistency: every WhatsApp link and every phone number on the site.
     const q = await open(b, APP);
-    await q.click(".whatsapp-preview-trigger");
-    await q.waitForTimeout(150);
-    await q.keyboard.press("Escape");
-    await q.waitForTimeout(150);
-    // Opening the WhatsApp modal scrolled down to Contact, where the hero header is
-    // inactive (inert). Scroll back to the top first, then open the CV modal there.
-    await q.evaluate(() => scrollTo(0, 0));
-    await q.waitForTimeout(400);
-    await q.click(".hero-header .cv-btn");
-    await q.waitForTimeout(200);
-    const s = await q.evaluate(() => ({
-      cv: document.getElementById("cvModal").classList.contains("open"),
-      wa: !!document.querySelector(".whatsapp-preview-backdrop"),
-    }));
-    check(
-      "WhatsApp and CV modals are independent (shared dialog hook)",
-      s.cv && !s.wa,
-      JSON.stringify(s),
-    );
-    await q.context().close();
-  }
-  for (const theme of ["dark", "light"])
-    for (const width of [1440, 768, 390]) {
-      const res = {};
-      for (const [k, url] of [
-        ["ref", REF],
-        ["app", APP],
-      ]) {
-        const q = await open(b, url, { width, theme });
-        await q.click(".whatsapp-preview-trigger");
-        await q.waitForTimeout(300);
-        if (url === REF)
-          await q.evaluate((WA_TEXT) => {
-            document.querySelector(".whatsapp-preview-box p").textContent = WA_TEXT;
-          }, WA_TEXT);
-        await q.mouse.move(1, 1);
-        await q.waitForTimeout(200);
-        res[k] = {
-          shot: await q.locator(".whatsapp-preview-box").screenshot({ animations: "disabled" }),
-          style: await q.evaluate(() =>
-            [
-              ".whatsapp-preview-backdrop",
-              ".whatsapp-preview-box",
-              ".whatsapp-preview-box .eyebrow",
-              ".whatsapp-preview-box h3",
-              ".whatsapp-preview-box p",
-              ".whatsapp-preview-close",
-            ].map((s) => {
-              const e = document.querySelector(s),
-                c = getComputedStyle(e),
-                r = e.getBoundingClientRect();
-              return `${s} ${Math.round(r.x)},${Math.round(r.y)},${Math.round(r.width)}x${Math.round(r.height)} ${c.backgroundColor} ${c.color} ${c.fontSize} ${c.zIndex} ${c.backdropFilter} ${c.borderRadius}`;
-            }),
-          ),
-        };
-        if (width === 1440) fs.writeFileSync(`${SHOTS}/whatsapp-${theme}-${k}.png`, res[k].shot);
-        await q.context().close();
+    const found = [];
+    for (const route of ["", "about", "projects", "experience", "contact", "faq"]) {
+      await q.goto(APP + route, { waitUntil: "networkidle" });
+      if (route === "") {
+        await q.click('.mini-ai-question[data-ai-question="contact"]');
+        await q.waitForTimeout(100);
       }
-      const d = await pixelDiff(b, res.ref.shot, res.app.shot);
-      const sd = res.ref.style
-        .map((x, i) =>
-          x === res.app.style[i] ? null : `\n   V21 ${x}\n   app ${res.app.style[i]}`,
-        )
-        .filter(Boolean);
-      check(
-        `${theme} @${width}: modal looks like V21 (same box, position, colours, blur; approved text)`,
-        ok(d) && sd.length === 0,
-        fmt(d) + sd.join(""),
+      if (route === "faq") {
+        await q.click(".faq-item:nth-child(6) .faq-trigger");
+        await q.waitForTimeout(400);
+      }
+      found.push(
+        await q.evaluate(
+          (route) => ({
+            route: "/" + route,
+            links: [...document.querySelectorAll("a[href]")]
+              .map((a) => a.getAttribute("href"))
+              .filter((h) => /wa\.me|whatsapp|tel:/i.test(h)),
+            numbers: document.body.innerText.match(/\+?\d[\d -]{8,}\d/g) || [],
+          }),
+          route,
+        ),
       );
     }
+    const links = found.flatMap((f) => f.links);
+    const numbers = found.flatMap((f) => f.numbers);
+    const count = (route) => found.find((f) => f.route === route).links.length;
+    check(
+      `every WhatsApp link is ${WA_URL} (one on Home, one on Contact; no tel: links); every phone number shown (AI answer, Contact card, FAQ) is ${WA_NUMBER}`,
+      links.length === 2 &&
+        links.every((h) => h === WA_URL) &&
+        count("/") === 1 &&
+        count("/contact") === 1 &&
+        numbers.length === 3 &&
+        numbers.every((n) => n === WA_NUMBER),
+      JSON.stringify(found),
+    );
+    await q.goto(APP, { waitUntil: "networkidle" });
+    await q.click('.mini-ai-question[data-ai-question="contact"]');
+    await q.waitForTimeout(100);
+    check(
+      "the Ask Faizan AI contact answer gives the number",
+      (await ai(q)).a === CONTACT_ANSWER,
+      (await ai(q)).a,
+    );
+    check("no console errors", q.errs.length === 0, q.errs.join(" | "));
+    await q.context().close();
+  }
 
   console.log("\n=== 6. Accessibility (axe-core, WCAG 2.1 A/AA) ===");
   for (const theme of ["dark", "light"]) {
@@ -664,18 +624,12 @@ const wa = (p) =>
         .include("#home-contact")
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
-      await q.click(".whatsapp-preview-trigger");
-      await q.waitForTimeout(200);
-      const m = await new AxeBuilder({ page: q })
-        .include(".whatsapp-preview-backdrop")
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        .analyze();
-      res[k] = [...r.violations, ...m.violations].map((v) => `${v.id}(${v.nodes.length})`);
+      res[k] = r.violations.map((v) => `${v.id}(${v.nodes.length})`);
       await q.context().close();
     }
     // Phase 6: the app must have no violations at all (V21's own are listed for reference).
     check(
-      `${theme}: Contact section + open WhatsApp modal: zero accessibility violations`,
+      `${theme}: Contact section with the WhatsApp link: zero accessibility violations`,
       res.app.length === 0,
       `app [${res.app.join(", ") || "none"}] V21 as designed [${res.ref.join(", ") || "none"}]`,
     );

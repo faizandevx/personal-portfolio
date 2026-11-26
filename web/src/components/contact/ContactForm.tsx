@@ -23,6 +23,7 @@ function buildMailto(data: FormData) {
 // browser's own validation; a valid form opens a prefilled email.
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,6 +36,17 @@ export default function ContactForm() {
     if (!form.reportValidity()) return;
     window.location.href = buildMailto(new FormData(form));
     setSubmitted(true);
+  };
+
+  // For visitors without an email app: copy the address so any mail service can use it.
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(PUBLIC_EMAIL);
+      setCopied(true);
+    } catch {
+      // Clipboard unavailable or blocked: the address stays visible and selectable.
+      setCopied(false);
+    }
   };
 
   return (
@@ -130,7 +142,10 @@ export default function ContactForm() {
         {submitted && (
           <>
             Your email app should open with your message ready to send. If it doesn&apos;t, please
-            email me at <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>.
+            email me at <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>.{" "}
+            <button className="copy-email" type="button" onClick={copyEmail}>
+              {copied ? "Address copied" : "Copy email address"}
+            </button>
           </>
         )}
       </p>

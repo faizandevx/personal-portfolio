@@ -68,7 +68,7 @@ empty photo element of the same size, pixel comparisons mask `#hero .photo-panel
 
 | Suite           | Checks | Covers                                                                                                                                                                                                                               |
 | --------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `contact`       |     89 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp modal, axe, no kiosk references                                                                                                                                              |
+| `contact`       |     73 | 2D: Contact section, Ask Faizan AI (scripted), WhatsApp link (new tab, number consistency), axe, no kiosk references                                                                                                                 |
 | `work-skills`   |     72 | 2C: Selected work + Expertise                                                                                                                                                                                                        |
 | `about`         |     87 | 2B: About section, Tech Visual, spacing refinement                                                                                                                                                                                   |
 | `company-links` |     44 | 2B: AlphaSoft360 / Aman Bank links                                                                                                                                                                                                   |
@@ -81,14 +81,15 @@ empty photo element of the same size, pixel comparisons mask `#hero .photo-panel
 | `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                                      |
 | `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                                                  |
 | `about-page`    |    284 | 3 + At a glance photo: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
-| `pages`         |    371 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                                     |
+| `pages`         |    373 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email, copy, WhatsApp card), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                |
 
 `pages` covers `/projects`, the case study, `/experience`, `/contact` and `/faq` at 8 widths in both
 themes, plus the skip link, 404 page, SEO files, security headers and client-side navigation. Use
 `PAGES=faq,site node tests/regression/pages.regression.cjs` to run part of it while developing.
 
 The first 11 suites are the 563 checks built during Phases 1–2D, plus 1 for the approved kiosk
-content correction (564). `homepage` was added in
+content correction (564). On 2026-11-26 "Let's Chat" became a WhatsApp link: `contact`'s 29 modal
+checks became 13 link checks and its axe scan has no modal (548). `homepage` was added in
 Step 2E (39 checks); Phase 6 added 13 accessibility checks (contrast in default, hover and focus
 states, decorative colours, favicon, footer LinkedIn, brand name). The axe checks require zero
 violations in the app.

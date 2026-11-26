@@ -1,23 +1,27 @@
-import { LINKEDIN_PROFILE_URL, PUBLIC_EMAIL } from "@/lib/site";
+import { LINKEDIN_PROFILE_URL, PUBLIC_EMAIL, WHATSAPP_NUMBER, WHATSAPP_URL } from "@/lib/site";
 
-// The "other ways to connect" column (design-reference/contact.html). Email
-// and LinkedIn are working links; WhatsApp is marked as not available yet.
+// The "other ways to connect" column (design-reference/contact.html). WhatsApp,
+// email and LinkedIn are working links. V21's WhatsApp card said "Coming soon"; it
+// now opens a chat with the approved public number (wa.me, new tab, no prefilled text).
 export default function ContactSide() {
   return (
     <aside aria-label="Other ways to connect" className="contact-side">
-      <div className="connect-feature">
+      <a className="connect-feature" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
         <span className="feature-kicker">
           <span aria-hidden="true" className="pulse-dot"></span> STAY CONNECTED
         </span>
         <h3>Prefer a quick chat?</h3>
-        <p>WhatsApp chat isn&apos;t available yet. Email is the best way to reach me.</p>
+        <p>
+          Message me on WhatsApp. It opens the app on your phone, or WhatsApp Web on a computer.
+        </p>
         <span className="feature-action">
-          WhatsApp option <span className="soon-tag">Coming soon</span>
+          {WHATSAPP_NUMBER} <span className="soon-tag">Chat on WhatsApp</span>
+          <span className="sr-only"> (opens in a new tab)</span>
         </span>
         <span aria-hidden="true" className="feature-shape">
           ↗
         </span>
-      </div>
+      </a>
       <a className="contact-method" href={`mailto:${PUBLIC_EMAIL}`}>
         <span aria-hidden="true" className="method-icon">
           <svg

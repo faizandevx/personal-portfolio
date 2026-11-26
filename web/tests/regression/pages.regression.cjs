@@ -10,7 +10,7 @@ const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const NO_CHROME = ".note-ribbon{display:none!important} nextjs-portal{display:none!important}";
 const NO_HEADERS = ".hero-header,.floating-header{visibility:hidden!important}";
 const FORBIDDEN =
-  /kiosk|POS Management|SkillOrbit|AlphaSoft K60|design preview|in this preview|layout examples|Sample project|wa\.me/i;
+  /kiosk|POS Management|SkillOrbit|AlphaSoft K60|design preview|in this preview|layout examples|Sample project/i;
 const REPO = "https://github.com/faizandevx/personal-portfolio";
 let failures = 0;
 const check = (n, ok, d = "") => {
@@ -72,9 +72,28 @@ const APPLY = {
       document.querySelector(s).classList.add("page-section-label");
     document.querySelector(".inside-hero p").textContent =
       "A timeline of my professional roles and the scope of my work.";
-    const h3 = document.querySelectorAll(".timeline-item h3")[1];
-    h3.textContent = h3.textContent.replace("AlphaSoft K60", "AlphaSoft360");
-    document.querySelector(".page-content a.cv-trigger").setAttribute("aria-haspopup", "dialog");
+    const h3s = document.querySelectorAll(".timeline-item h3");
+    h3s[1].textContent = h3s[1].textContent.replace("AlphaSoft K60", "AlphaSoft360");
+    // Approved 2026-11-25: the employer names link to their websites, as on Home and About.
+    for (const [h3, name, href] of [
+      [h3s[0], "Aman Bank", "https://www.aman-bank.com/"],
+      [h3s[1], "AlphaSoft360", "https://www.alphasoft360.com/"],
+    ])
+      h3.innerHTML = h3.textContent.replace(
+        name,
+        `<a class="about-company-link" href="${href}" target="_blank" rel="noopener noreferrer">${name}<span class="sr-only"> (opens in a new tab)</span></a>`,
+      );
+    const cv = document.querySelector(".page-content a.cv-trigger");
+    cv.setAttribute("aria-haspopup", "dialog");
+    // Approved 2026-11-25: "View CV" opens the PDF in a new tab, before "Download CV".
+    const row = document.createElement("div");
+    row.className = "project-actions experience-cv-actions";
+    cv.replaceWith(row);
+    row.insertAdjacentHTML(
+      "beforeend",
+      '<a class="btn btn-primary" href="/cv/Faizan-Ali-CV.pdf" target="_blank" rel="noopener noreferrer">View CV <span aria-hidden="true">↗</span><span class="sr-only"> (PDF, opens in a new tab)</span></a>',
+    );
+    row.append(cv);
   },
   contact: () => {
     for (const s of [".inside-hero .container > .eyebrow", ".contact-form-card .eyebrow"])
@@ -89,8 +108,19 @@ const APPLY = {
       'Send via email <span aria-hidden="true">↗</span>';
     document.querySelector(".privacy-note").innerHTML =
       '<span aria-hidden="true">◇</span> Opens your email app. Nothing is stored on this site.';
-    document.querySelector(".connect-feature p").textContent =
-      "WhatsApp chat isn't available yet. Email is the best way to reach me.";
+    // Approved 2026-11-26 (change 30): the WhatsApp card opens a chat with the public number.
+    const feature = document.querySelector(".connect-feature");
+    const whatsApp = document.createElement("a");
+    whatsApp.className = "connect-feature";
+    whatsApp.setAttribute("href", "https://wa.me/923473057550");
+    whatsApp.setAttribute("target", "_blank");
+    whatsApp.setAttribute("rel", "noopener noreferrer");
+    whatsApp.innerHTML = feature.innerHTML;
+    whatsApp.querySelector("p").textContent =
+      "Message me on WhatsApp. It opens the app on your phone, or WhatsApp Web on a computer.";
+    whatsApp.querySelector(".feature-action").innerHTML =
+      '+92 347 3057550 <span class="soon-tag">Chat on WhatsApp</span><span class="sr-only"> (opens in a new tab)</span>';
+    feature.replaceWith(whatsApp);
     // WCAG 2.5.3: the link's name comes from its visible text.
     document.querySelector("a.contact-method").removeAttribute("aria-label");
     // Approved 2026-11-24 (change 26): the LinkedIn card links to the confirmed profile.
@@ -117,7 +147,7 @@ const APPLY = {
     const answers = {
       3: "Yes. Browse the Projects page for selected work and its case study. Some work uses private repositories or cannot disclose confidential implementation details.",
       5: "Use the “CV” button in the navigation, or “Download CV” on the homepage or the Experience page, to download my CV as a PDF.",
-      6: "Use the Contact page or email me at faizandevx@gmail.com. WhatsApp chat isn’t available yet.",
+      6: "Use the Contact page, email me at faizandevx@gmail.com, or message me on WhatsApp at +92 347 3057550.",
       7: "No. “Ask Faizan AI” on the homepage is a scripted demo with pre-written answers about this portfolio. It isn’t a live AI, and it isn’t a replacement for contacting Faizan directly.",
     };
     document.querySelectorAll(".faq-item").forEach((item, i) => {
@@ -575,15 +605,48 @@ const BEHAVIOUR = {
   async experience(b, page) {
     const q = await open(b, appPage(page.route));
     const t = await q.evaluate(() => ({
-      roles: [...document.querySelectorAll(".timeline-item h3")].map((e) => e.textContent),
-      links: document.querySelectorAll(".timeline a").length,
+      roles: [...document.querySelectorAll(".timeline-item h3")].map((e) =>
+        e.textContent.replace(" (opens in a new tab)", ""),
+      ),
+      links: [...document.querySelectorAll(".timeline a")].map(
+        (a) =>
+          `${a.firstChild.textContent} ${a.href} ${a.target} ${a.rel} ${a.className} ${a.parentElement.tagName}`,
+      ),
     }));
-    check(
-      "timeline: IT Project Manager · Aman Bank and Software Developer · AlphaSoft360, names as plain text",
-      t.roles.join("|") === "IT Project Manager · Aman Bank|Software Developer · AlphaSoft360" &&
-        t.links === 0,
-      JSON.stringify(t),
+    const link = q.locator(".timeline a").first();
+    const before = await link.evaluate((a) => getComputedStyle(a).color);
+    await link.hover();
+    await q.waitForTimeout(350);
+    const hovered = await link.evaluate((a) => getComputedStyle(a).color);
+    const orange = await q.evaluate(
+      () => getComputedStyle(document.querySelector(".timeline-item .time")).color,
     );
+    check(
+      "timeline: IT Project Manager · Aman Bank and Software Developer · AlphaSoft360; only the employer names link to their websites in a new tab and turn orange on hover",
+      t.roles.join("|") === "IT Project Manager · Aman Bank|Software Developer · AlphaSoft360" &&
+        t.links.join("|") ===
+          "Aman Bank https://www.aman-bank.com/ _blank noopener noreferrer about-company-link H3|AlphaSoft360 https://www.alphasoft360.com/ _blank noopener noreferrer about-company-link H3" &&
+        before !== hovered &&
+        hovered === orange,
+      JSON.stringify({ ...t, before, hovered, orange }),
+    );
+    const view = await q.evaluate(() => {
+      const a = document.querySelector(".experience-cv-actions a.btn-primary");
+      const d = document.querySelector(".experience-cv-actions a.cv-trigger");
+      const [ra, rd] = [a.getBoundingClientRect(), d.getBoundingClientRect()];
+      return {
+        attrs: `${a.getAttribute("href")} ${a.target} ${a.rel} ${a.hasAttribute("download")}`,
+        name: a.textContent,
+        sideBySide: Math.round(ra.top) === Math.round(rd.top) && ra.right < rd.left,
+      };
+    });
+    const [tab] = await Promise.all([
+      q.context().waitForEvent("page"),
+      q.click(".experience-cv-actions a.btn-primary"),
+    ]);
+    await tab.waitForLoadState("domcontentloaded").catch(() => {});
+    const tabUrl = new URL(tab.url()).pathname;
+    await tab.close();
     await q.click(".page-content a.cv-trigger");
     await q.waitForTimeout(200);
     const opened = await q.locator("#cvModal.open").count();
@@ -593,8 +656,15 @@ const BEHAVIOUR = {
       document.activeElement.matches(".page-content a.cv-trigger"),
     );
     check(
-      "'Download CV' opens the honest CV modal; Escape closes it and returns focus",
-      opened === 1 && refocused && (await q.locator("#cvModal.open").count()) === 0,
+      "'View CV' opens the PDF in a new tab, beside 'Download CV', which opens the CV modal; Escape closes it and returns focus",
+      view.attrs === "/cv/Faizan-Ali-CV.pdf _blank noopener noreferrer false" &&
+        view.name === "View CV ↗ (PDF, opens in a new tab)" &&
+        view.sideBySide &&
+        tabUrl === "/cv/Faizan-Ali-CV.pdf" &&
+        opened === 1 &&
+        refocused &&
+        (await q.locator("#cvModal.open").count()) === 0,
+      JSON.stringify({ ...view, tabUrl }),
     );
     await q.context().close();
   },
@@ -709,15 +779,38 @@ const BEHAVIOUR = {
         requests.length === 0,
       requests.join(", "),
     );
+    // Without an email app, the visitor can copy the address from the status message.
+    await q.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+    await q.click(".form-status .copy-email");
+    await q.waitForTimeout(200);
     check(
-      "email method links to mailto; LinkedIn opens the confirmed profile in a new tab; no WhatsApp link",
-      (await q.locator('a.contact-method[href="mailto:faizandevx@gmail.com"]').count()) === 1 &&
+      "'Copy email address' copies faizandevx@gmail.com and says so; the address stays visible",
+      (await q.evaluate(() => navigator.clipboard.readText())) === "faizandevx@gmail.com" &&
+        (await q.locator(".form-status .copy-email").innerText()) === "Address copied" &&
+        (await q.locator(".form-status").innerText()).includes("faizandevx@gmail.com"),
+      await q.locator(".form-status").innerText(),
+    );
+    const card = await q.locator("main a.connect-feature").evaluate((a) => ({
+      href: a.getAttribute("href"),
+      target: a.target,
+      rel: a.rel,
+      text: a.innerText.replace(/\s+/g, " "),
+    }));
+    check(
+      "WhatsApp card opens https://wa.me/923473057550 in a new tab and shows +92 347 3057550; email links to mailto; LinkedIn opens the confirmed profile; no other WhatsApp link",
+      card.href === "https://wa.me/923473057550" &&
+        card.target === "_blank" &&
+        card.rel === "noopener noreferrer" &&
+        card.text.includes("+92 347 3057550") &&
+        !/coming soon/i.test(card.text) &&
+        (await q.locator('a.contact-method[href="mailto:faizandevx@gmail.com"]').count()) === 1 &&
         (await q
           .locator(
             'main a.contact-method[href="https://www.linkedin.com/in/faizan-ali-5aa430380"][target="_blank"][rel="noopener noreferrer"]',
           )
           .count()) === 1 &&
-        (await q.locator('main a[href*="whatsapp" i], main a[href*="wa.me" i]').count()) === 0,
+        (await q.locator('main a[href*="whatsapp" i], main a[href*="wa.me" i]').count()) === 1,
+      JSON.stringify(card),
     );
     await q.context().close();
     const [ref, app] = await both(b, page, { motion: "no-preference" });
@@ -740,6 +833,35 @@ const BEHAVIOUR = {
       "email method hover matches V21",
       (await read(ref, 'a.contact-method[href^="mailto:"]')) ===
         (await read(app, 'a.contact-method[href^="mailto:"]')),
+    );
+    // The WhatsApp card is a link now: it lifts 2px on hover and shows the orange focus
+    // outline from the keyboard (V21's card was static, so the app is checked alone).
+    const look = () =>
+      app.locator("a.connect-feature").evaluate((e) => {
+        const c = getComputedStyle(e);
+        return {
+          transform: c.transform,
+          outline: `${c.outlineStyle} ${c.outlineWidth} ${c.outlineColor}`,
+          orange: getComputedStyle(document.documentElement).getPropertyValue("--orange").trim(),
+        };
+      });
+    await app.mouse.move(1, 1);
+    const idle = await look();
+    await app.hover("a.connect-feature");
+    await app.waitForTimeout(500);
+    const hovered = await look();
+    await app.mouse.move(1, 1);
+    await app.locator("a.connect-feature").focus();
+    await app.keyboard.press("Shift+Tab");
+    await app.keyboard.press("Tab");
+    await app.waitForTimeout(300);
+    const focused = await look();
+    check(
+      "WhatsApp card: still at rest, lifts 2px on hover, orange outline on keyboard focus",
+      idle.transform === "none" &&
+        hovered.transform === "matrix(1, 0, 0, 1, 0, -2)" &&
+        focused.outline.startsWith("solid 2px"),
+      JSON.stringify({ idle, hovered, focused }),
     );
     await closeAll(ref, app);
   },
@@ -1056,6 +1178,8 @@ async function siteChecks(b) {
       "security headers are sent and the framework is not advertised",
       h["x-content-type-options"] === "nosniff" &&
         h["x-frame-options"] === "DENY" &&
+        h["content-security-policy"] ===
+          "frame-ancestors 'none'; object-src 'none'; base-uri 'self'" &&
         h["referrer-policy"] === "strict-origin-when-cross-origin" &&
         /camera=\(\)/.test(h["permissions-policy"] || "") &&
         !h["x-powered-by"],

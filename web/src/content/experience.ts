@@ -1,6 +1,8 @@
 // Professional experience: the About page career cards (V21
 // design-reference/about.html) and the Experience timeline (experience.html),
 // which uses V21's own shorter employer name, dates and description.
+import type { Employer } from "@/components/ui/EmployerLink";
+
 export type Job = {
   index: string; // card label, e.g. "02 / BANKING"
   dates: string;
@@ -10,6 +12,7 @@ export type Job = {
   summary: string;
   tags: string[];
   employer: string;
+  employerLink: Employer; // the employer's website (EmployerLink)
   timelineDates: string;
   timelineSummary: string;
 };
@@ -25,6 +28,7 @@ export const jobs: Job[] = [
       "Coordinated digital banking technology projects across stakeholders, development teams and external vendors, with a focus on planning, testing and delivery.",
     tags: ["Digital banking", "Project delivery", "Cross-functional work"],
     employer: "Aman Bank",
+    employerLink: "amanBank",
     timelineDates: "Jan 2026 – Oct 2026",
     timelineSummary:
       "Digital banking project coordination, vendor delivery, API integration discussions, testing and production readiness.",
@@ -39,6 +43,7 @@ export const jobs: Job[] = [
       "Developed practical application features while strengthening my software engineering, debugging and development workflow foundations.",
     tags: ["Application development", "Problem solving", "Engineering"],
     employer: "AlphaSoft360",
+    employerLink: "alphasoft360",
     timelineDates: "Mar 2025 – Dec 2025",
     timelineSummary:
       "Application development work across software features, backend and frontend development practices.",

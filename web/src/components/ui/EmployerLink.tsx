@@ -1,5 +1,5 @@
-// A link to a former employer's public website (approved: homepage About and the
-// About page story). It keeps the surrounding bold text colour, turns orange on
+// A link to a former employer's public website (approved: homepage About, the
+// About page story and the Experience timeline). It keeps the surrounding bold text colour, turns orange on
 // hover and keyboard focus (.about-company-link in approved-changes.css), opens in
 // a new tab, and tells screen-reader users so.
 const EMPLOYERS = {
@@ -7,8 +7,10 @@ const EMPLOYERS = {
   amanBank: { href: "https://www.aman-bank.com/", name: "Aman Bank" },
 } as const;
 
+export type Employer = keyof typeof EMPLOYERS;
+
 type EmployerLinkProps = {
-  employer: keyof typeof EMPLOYERS;
+  employer: Employer;
   // The visible name, e.g. "Aman Bank for Commerce & Investment"; defaults to the short name.
   children?: React.ReactNode;
 };

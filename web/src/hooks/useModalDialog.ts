@@ -11,7 +11,7 @@ type ModalDialogOptions = {
   initialFocusRef: RefObject<HTMLElement | null>;
 };
 
-// Shared behaviour for the site's modal dialogs (CV, WhatsApp): while open,
+// Shared behaviour for the site's modal dialogs (the CV modal): while open,
 // lock background scrolling, move focus into the dialog, close on Escape and
 // keep Tab / Shift+Tab inside it. Returning focus on close is up to the caller,
 // because only it knows which element opened the dialog.

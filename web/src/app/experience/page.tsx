@@ -1,8 +1,9 @@
 import InsideHero from "@/components/hero/InsideHero";
 import CvTrigger from "@/components/layout/CvTrigger";
+import EmployerLink from "@/components/ui/EmployerLink";
 import { jobs } from "@/content/experience";
 import JsonLd from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/site";
+import { CV_FILE, pageMetadata } from "@/lib/site";
 import { pageJsonLd } from "@/lib/structured-data";
 
 const title = "Experience | Faizan Ali, Software Developer & IT Project Manager";
@@ -11,8 +12,9 @@ const description =
 
 export const metadata = pageMetadata(title, description, "/experience");
 
-// Experience page (design-reference/experience.html). Employer names stay plain
-// text, as in V21; "AlphaSoft360" replaces V21's "AlphaSoft K60".
+// Experience page (design-reference/experience.html). "AlphaSoft360" replaces V21's
+// "AlphaSoft K60". Approved 2026-11-25: the employer names link to their websites,
+// and "View CV" opens the PDF in a new tab next to V21's "Download CV".
 export default function ExperiencePage() {
   return (
     <>
@@ -44,13 +46,28 @@ export default function ExperiencePage() {
                 <article className="timeline-item" key={job.role}>
                   <div className="time">{job.timelineDates}</div>
                   <h3>
-                    {job.role} · {job.employer}
+                    {/* One text node, as in V21: split text lays out half a pixel differently. */}
+                    {`${job.role} · `}
+                    <EmployerLink employer={job.employerLink}>{job.employer}</EmployerLink>
                   </h3>
                   <p>{job.timelineSummary}</p>
                 </article>
               ))}
             </div>
-            <CvTrigger className="btn btn-secondary cv-trigger">↓ Download CV</CvTrigger>
+            <div className="project-actions experience-cv-actions">
+              {CV_FILE && (
+                <a
+                  className="btn btn-primary"
+                  href={CV_FILE}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View CV <span aria-hidden="true">↗</span>
+                  <span className="sr-only"> (PDF, opens in a new tab)</span>
+                </a>
+              )}
+              <CvTrigger className="btn btn-secondary cv-trigger">↓ Download CV</CvTrigger>
+            </div>
           </div>
         </section>
       </main>

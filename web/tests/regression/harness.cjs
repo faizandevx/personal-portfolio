@@ -55,7 +55,8 @@ async function launch(options = {}) {
               '<a class="skip-link" href="#main-content">Skip to main content</a>',
             );
             // Approved 2026-11-24 (CLAUDE.md, change 26): the confirmed LinkedIn profile is
-            // a link like GitHub's, in the hero and the footer.
+            // a link like GitHub's, in the hero and the footer. (The helper turns any
+            // element into a link with the same content.)
             const linkedIn = (element, attributes) => {
               if (!element) return;
               const link = document.createElement("a");
@@ -80,6 +81,16 @@ async function launch(options = {}) {
               rel: "noopener noreferrer",
               "aria-label": "LinkedIn profile",
               title: "LinkedIn",
+            });
+            // Approved 2026-11-26: "Let's Chat" opens WhatsApp with the approved public
+            // number (V21's button opened a "coming soon" modal; replacing the button
+            // also drops V21's click handler).
+            linkedIn(document.querySelector(".whatsapp-preview-trigger"), {
+              class: "btn btn-primary whatsapp-preview-trigger",
+              href: "https://wa.me/923473057550",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              "aria-label": "Let's Chat on WhatsApp, +92 347 3057550 (opens in a new tab)",
             });
             const wording = {
               "#home-work .section-intro": "A look at my project work and professional experience.",

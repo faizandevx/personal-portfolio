@@ -29,7 +29,7 @@ export const faqs = [
   {
     question: "How can I contact Faizan directly?",
     answer:
-      "Use the Contact page or email me at faizandevx@gmail.com. WhatsApp chat isn’t available yet.",
+      "Use the Contact page, email me at faizandevx@gmail.com, or message me on WhatsApp at +92 347 3057550.",
   },
   {
     question: "Is the AI assistant a real person?",

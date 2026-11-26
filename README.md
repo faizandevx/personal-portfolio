@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (1,271 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,257 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is optional; the rest are reserved)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,7 +58,7 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 1,271 checks (about 55 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,257 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
@@ -137,9 +137,9 @@ Phase 1 is complete and approved.
   - **Ask Faizan AI** is a scripted demo with three pre-written answers. Its subtitle reads
     "Scripted demo", and it shows the DEMO pill and "Scripted responses · No live AI yet". No AI
     service is called.
-  - **Let's Chat** opens an accessible "WhatsApp connection coming soon" modal. No number is
-    published and no chat is opened.
-  - The CV and WhatsApp modals share one dialog hook (`src/hooks/useModalDialog.ts`).
+  - **Let's Chat** opened an accessible "WhatsApp connection coming soon" modal until the public
+    number was approved; since 2026-11-26 it opens a WhatsApp chat (see Final assets).
+  - The CV modal uses a shared dialog hook (`src/hooks/useModalDialog.ts`).
 - 2E: test consolidation and final homepage review.
   - The 563 checks from Phases 1–2D are now tracked in `web/tests/regression/`, with no
     machine-specific paths, a shared harness and the `npm run test:regression` runner.
@@ -192,14 +192,19 @@ Phase 1 is complete and approved.
 - **Projects:** `/projects` shows one full-width card for Personal Portfolio, and
   `/projects/personal-portfolio` is its case study, linking to the public repository. Project details
   come from `content/projects.ts` and are verified against this repository.
-- **Experience:** `/experience` is the V21 timeline with AlphaSoft360 and Aman Bank as plain text, plus
-  the CV button.
-- **Contact:** the form validates and then opens the visitor's own email app with a prefilled message.
-  No message passes through this site, and nothing is stored. Email is the working contact method.
+- **Experience:** `/experience` is the V21 timeline. AlphaSoft360 and Aman Bank link to their websites
+  (new tab). "View CV" opens the PDF in a new tab, and "Download CV" opens the CV modal.
+- **Contact:** the form validates and then opens the visitor's own email app with a prefilled message
+  ("Send via email"; "Opens your email app"). No message passes through this site, and nothing is
+  stored. If no email app opens, the status message shows the address with a "Copy email address"
+  button. The orange "Prefer a quick chat?" card opens WhatsApp (+92 347 3057550); email and LinkedIn
+  are the other working methods.
 - **FAQ:** the V21 single-open accordion, keyboard accessible, with visitor-facing answers.
 - **Production:** skip link, drawer focus return, custom 404 page (`src/proxy.ts` gives unknown project
   URLs a real 404 status), canonical and Open Graph metadata,
-  sitemap, robots, Open Graph image, Person structured data and security headers.
+  sitemap, robots, Open Graph image, Person structured data and security headers, including a
+  minimal Content-Security-Policy (`frame-ancestors 'none'; object-src 'none'; base-uri 'self'`,
+  no script restrictions, so partial prerendering keeps working).
 - **SEO (Phase 1, 2026-11-24):** every indexable page, home included, has a canonical link equal to
   its `sitemap.xml` URL. Every page shares the Open Graph image with a large Twitter card
   (`pageMetadata` in `src/lib/site.ts`). The 404 page is `noindex` with status 404.
@@ -259,11 +264,10 @@ needed. Next.js 16.4.6 needs Node.js 20.9 or later.
 These need details only the site owner can supply. Each one is labelled honestly on the site, and none
 is ever shown as working:
 
-| Item                | Current behaviour                                    | Needed                      |
-| ------------------- | ---------------------------------------------------- | --------------------------- |
-| WhatsApp            | Modal says chat isn't available yet; no number shown | A public number             |
-| Direct form sending | Form opens the visitor's email app instead           | A mail provider and API key |
-| Ask Faizan AI       | Labelled scripted demo with pre-written answers      | An AI provider, if wanted   |
+| Item                | Current behaviour                               | Needed                      |
+| ------------------- | ----------------------------------------------- | --------------------------- |
+| Direct form sending | Form opens the visitor's email app instead      | A mail provider and API key |
+| Ask Faizan AI       | Labelled scripted demo with pre-written answers | An AI provider, if wanted   |
 
 ### Final assets
 
@@ -275,7 +279,11 @@ is ever shown as working:
   saves it as `Faizan-Ali-CV.pdf`. FAQ #5 points to it.
 - **LinkedIn (integrated 2026-11-24):** `https://www.linkedin.com/in/faizan-ali-5aa430380` is linked
   from the hero, the footer, the Contact page and the structured data.
-- **WhatsApp:** this is activated only once a public number is verified.
+- **WhatsApp (integrated 2026-11-26):** the approved public number +92 347 3057550 (`WHATSAPP_NUMBER`
+  and `WHATSAPP_URL` = `https://wa.me/923473057550` in `src/lib/site.ts`). Home "Let's Chat" and the
+  Contact card open the chat in a new tab (`rel="noopener noreferrer"`): the app on a phone, WhatsApp
+  Web or the desktop app on a computer. No message is prefilled or sent, and no WhatsApp API or paid
+  service is used. The Ask Faizan AI contact answer and FAQ #6 show the number.
 
 ### Accessibility (Phase 6)
 

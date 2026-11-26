@@ -24,6 +24,11 @@ export const PUBLIC_EMAIL = "faizandevx@gmail.com";
 export const GITHUB_PROFILE_URL = "https://github.com/faizandevx";
 // Confirmed by the user on 2026-11-24 (the URL on the CV).
 export const LINKEDIN_PROFILE_URL = "https://www.linkedin.com/in/faizan-ali-5aa430380";
+// Approved for public display by the user on 2026-11-26. wa.me opens the app on a
+// phone and offers WhatsApp Web or the desktop app on a computer; no message is
+// prefilled or sent.
+export const WHATSAPP_NUMBER = "+92 347 3057550";
+export const WHATSAPP_URL = "https://wa.me/923473057550";
 
 // The CV PDF under web/public/ (the original file, unedited; it downloads as
 // Faizan-Ali-CV.pdf). If set to null, the CV modal says the CV isn't available yet.

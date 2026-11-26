@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { WHATSAPP_NUMBER } from "@/lib/site";
 
 // The V21 "Ask Faizan AI" card (design-reference/index.html + app.js). It is a
 // scripted demo: the three answers below are pre-written, and no AI model or
@@ -22,8 +23,7 @@ const scripted = {
   contact: {
     label: "How to connect?",
     question: "How can I get in touch?",
-    answer:
-      "You can reach Faizan through the Contact page by email, or use Let’s Chat on WhatsApp once a professional contact number is connected.",
+    answer: `You can reach Faizan by email through the Contact page, or use Let’s Chat to message him on WhatsApp at ${WHATSAPP_NUMBER}.`,
   },
 } as const;
 
