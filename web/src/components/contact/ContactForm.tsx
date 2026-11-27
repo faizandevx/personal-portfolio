@@ -23,7 +23,7 @@ type Status =
   | { kind: "idle" }
   | { kind: "mailto" }
   | { kind: "sending" }
-  | { kind: "sent"; email: string }
+  | { kind: "sent" }
   | { kind: "error"; reason: "invalid" | "rate_limited" | "failed" };
 
 const ERRORS = {
@@ -68,7 +68,7 @@ export default function ContactForm({ directDelivery = false }: { directDelivery
         }),
       });
       if (response.ok) {
-        setStatus({ kind: "sent", email: String(data.email) });
+        setStatus({ kind: "sent" });
         form.reset();
         submissionId.current = null;
       } else {
@@ -242,7 +242,12 @@ export default function ContactForm({ directDelivery = false }: { directDelivery
             : " Opens your email app. Nothing is stored on this site."}
         </p>
       </div>
-      <p aria-live="polite" className="form-status" hidden={status.kind === "idle"} role="status">
+      <p
+        aria-live="polite"
+        className={status.kind === "sent" ? "form-status form-status-success" : "form-status"}
+        hidden={status.kind === "idle"}
+        role="status"
+      >
         {status.kind === "mailto" && (
           <>
             Your email app should open with your message ready to send. If it doesn&apos;t, please
@@ -252,8 +257,17 @@ export default function ContactForm({ directDelivery = false }: { directDelivery
         {status.kind === "sending" && "Sending your message…"}
         {status.kind === "sent" && (
           <>
-            Thank you, your message has been sent. I&apos;ll reply to {status.email} as soon as I
-            can.
+            <svg aria-hidden="true" className="form-status-icon" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="11" />
+              <path d="m7 12.5 3.2 3.2L17 9" />
+            </svg>
+            <span className="form-status-text">
+              <strong>Message sent successfully!</strong>{" "}
+              <span>
+                Thank you for reaching out! I appreciate your interest and will get back to you as
+                soon as possible.
+              </span>
+            </span>
           </>
         )}
         {status.kind === "error" && (

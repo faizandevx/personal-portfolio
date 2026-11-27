@@ -123,6 +123,16 @@ const APPLY = {
     feature.replaceWith(whatsApp);
     // WCAG 2.5.3: the link's name comes from its visible text.
     document.querySelector("a.contact-method").removeAttribute("aria-label");
+    // Approved 2026-11-27: "Copy email" beside the email card (a sibling, not inside the link).
+    const email = document.querySelector('a.contact-method[href^="mailto:"]');
+    const emailWrap = document.createElement("div");
+    emailWrap.className = "contact-method-email";
+    email.replaceWith(emailWrap);
+    emailWrap.append(email);
+    emailWrap.insertAdjacentHTML(
+      "beforeend",
+      '<button class="method-copy-btn" type="button">Copy email</button><span aria-live="polite" class="sr-only"></span>',
+    );
     // Approved 2026-11-24 (change 26): the LinkedIn card links to the confirmed profile.
     const card = document.querySelector(".contact-side small").closest(".contact-method");
     const link = document.createElement("a");
@@ -879,6 +889,91 @@ const BEHAVIOUR = {
         hovered.transform === "matrix(1, 0, 0, 1, 0, -2)" &&
         focused.outline.startsWith("solid 2px"),
       JSON.stringify({ idle, hovered, focused }),
+    );
+    // Email card (2026-11-27): the whole card is the mailto link, and "Copy email" is a
+    // sibling button for visitors whose computer has no email app.
+    const emailCard = 'a.contact-method[href^="mailto:"]';
+    const mailNav = [];
+    const emailCdp = await app.context().newCDPSession(app);
+    await emailCdp.send("Page.enable");
+    emailCdp.on("Page.frameRequestedNavigation", (e) => mailNav.push(e.url));
+    await app.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+    const structure = await app.evaluate((sel) => {
+      const a = document.querySelector(sel);
+      const btn = document.querySelector(".method-copy-btn");
+      const ar = a.getBoundingClientRect();
+      const br = btn.getBoundingClientRect();
+      return {
+        nested: a.contains(btn) || !!a.querySelector("a, button"),
+        sibling: btn.parentElement === a.parentElement,
+        inCard:
+          br.left >= ar.left && br.right <= ar.right && br.top >= ar.top && br.bottom <= ar.bottom,
+        name: btn.textContent,
+        type: btn.type,
+      };
+    }, emailCard);
+    await app.mouse.move(1, 1);
+    await app.click(`${emailCard} .method-copy strong`);
+    await app.waitForTimeout(300);
+    check(
+      "Email card: the whole card is the mailto link (a click opens mailto:faizandevx@gmail.com); 'Copy email' sits in the card as a sibling button, not inside the link",
+      mailNav.join() === "mailto:faizandevx@gmail.com" &&
+        !structure.nested &&
+        structure.sibling &&
+        structure.inCard &&
+        structure.name === "Copy email" &&
+        structure.type === "button",
+      JSON.stringify({ structure, mailNav }),
+    );
+    await app.locator(emailCard).focus();
+    await app.keyboard.press("Tab");
+    const copyFocus = await app.evaluate(() => {
+      const e = document.activeElement;
+      const c = getComputedStyle(e);
+      return { cls: e.className, outline: `${c.outlineStyle} ${c.outlineWidth}` };
+    });
+    await app.keyboard.press("Enter");
+    await app.waitForTimeout(300);
+    const copied = {
+      clipboard: await app.evaluate(() => navigator.clipboard.readText()),
+      text: await app.locator(".method-copy-btn").innerText(),
+      live: await app.locator(".contact-method-email [aria-live=polite]").textContent(),
+    };
+    check(
+      "'Copy email' is the next Tab stop after the card, with the orange outline on keyboard focus; Enter copies faizandevx@gmail.com, shows 'Copied' and announces it",
+      copyFocus.cls === "method-copy-btn" &&
+        copyFocus.outline.startsWith("solid 2px") &&
+        copied.clipboard === "faizandevx@gmail.com" &&
+        copied.text === "Copied" &&
+        copied.live === "Email address copied.",
+      JSON.stringify({ copyFocus, copied }),
+    );
+    const lift = () =>
+      app.evaluate(
+        (sel) => ({
+          card: getComputedStyle(document.querySelector(sel)).transform,
+          button: getComputedStyle(document.querySelector(".method-copy-btn")).transform,
+        }),
+        emailCard,
+      );
+    await app.locator(emailCard).blur();
+    await app.mouse.move(1, 1);
+    await app.waitForTimeout(500);
+    const rest = await lift();
+    await app.hover(emailCard);
+    await app.waitForTimeout(500);
+    const overCard = await lift();
+    await app.hover(".method-copy-btn");
+    await app.waitForTimeout(500);
+    const overButton = await lift();
+    check(
+      "Email card and 'Copy email' rest together and lift 2px together, whether the card or the button is hovered",
+      rest.card === "none" &&
+        rest.button === "none" &&
+        [overCard, overButton].every(
+          (l) => l.card === "matrix(1, 0, 0, 1, 0, -2)" && l.button === "matrix(1, 0, 0, 1, 0, -2)",
+        ),
+      JSON.stringify({ rest, overCard, overButton }),
     );
     await closeAll(ref, app);
   },

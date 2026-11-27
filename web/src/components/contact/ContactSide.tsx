@@ -1,3 +1,4 @@
+import CopyEmailButton from "@/components/contact/CopyEmailButton";
 import { LINKEDIN_PROFILE_URL, PUBLIC_EMAIL, WHATSAPP_NUMBER, WHATSAPP_URL } from "@/lib/site";
 
 // The "other ways to connect" column (design-reference/contact.html). WhatsApp,
@@ -22,28 +23,32 @@ export default function ContactSide() {
           ↗
         </span>
       </a>
-      <a className="contact-method" href={`mailto:${PUBLIC_EMAIL}`}>
-        <span aria-hidden="true" className="method-icon">
-          <svg
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-            viewBox="0 0 24 24"
-          >
-            <rect height="14" rx="3" width="18" x="3" y="5"></rect>
-            <path d="m4 7 8 6 8-6"></path>
-          </svg>
-        </span>
-        <span className="method-copy">
-          <span className="method-label">Email me</span>
-          <strong>{PUBLIC_EMAIL}</strong>
-        </span>
-        <span aria-hidden="true" className="method-arrow">
-          ↗
-        </span>
-      </a>
+      {/* The whole card is the mailto link; "Copy email" sits beside it, not inside it. */}
+      <div className="contact-method-email">
+        <a className="contact-method" href={`mailto:${PUBLIC_EMAIL}`}>
+          <span aria-hidden="true" className="method-icon">
+            <svg
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              viewBox="0 0 24 24"
+            >
+              <rect height="14" rx="3" width="18" x="3" y="5"></rect>
+              <path d="m4 7 8 6 8-6"></path>
+            </svg>
+          </span>
+          <span className="method-copy">
+            <span className="method-label">Email me</span>
+            <strong>{PUBLIC_EMAIL}</strong>
+          </span>
+          <span aria-hidden="true" className="method-arrow">
+            ↗
+          </span>
+        </a>
+        <CopyEmailButton />
+      </div>
       <div className="contact-method contact-static">
         <span aria-hidden="true" className="method-icon">
           <svg

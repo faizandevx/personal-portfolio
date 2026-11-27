@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (1,258 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,261 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Environment variables (all optional: site URL, contact form delivery)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,11 +58,11 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 1,258 checks (about 55 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,261 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
-npm run test:contact-delivery             # contact form delivery with a mock provider (57 checks, own build)
+npm run test:contact-delivery             # contact form delivery with a mock provider (61 checks, own build)
 ```
 
 ## Tech stack
@@ -312,7 +312,7 @@ How it works: the browser validates the fields and posts JSON to `/api/contact`.
    form's mode is decided at build time.
 5. **Send one real test message:** on the live Contact page, fill in your own name, a second email
    address you can read (so you can test Reply-To), and a short message. Wait at least 3 seconds,
-   then click "Send message". You should see "Thank you, your message has been sent…".
+   then click "Send message". You should see "Message sent successfully!" with a green check.
 6. **Confirm delivery in Gmail:** in faizandevx@gmail.com, look for "Portfolio enquiry from <your
    name>" from "Portfolio Contact <onboarding@resend.dev>". Check **Spam** the first time and mark
    it "Not spam". Click **Reply** and check that it goes to the address you entered. Resend's

@@ -390,6 +390,18 @@ function run(cmd, args, env) {
             (n) => document.querySelector(`[name=${n}]`).value,
           ),
           button: document.querySelector(".send-btn").textContent.trim(),
+          success: document.querySelector(".form-status").classList.contains("form-status-success"),
+          icon: (() => {
+            const svg = document.querySelector(".form-status .form-status-icon");
+            if (!svg) return null;
+            const r = svg.getBoundingClientRect();
+            return {
+              hidden: svg.getAttribute("aria-hidden"),
+              size: `${Math.round(r.width)}x${Math.round(r.height)}`,
+              stroke: getComputedStyle(svg).stroke,
+            };
+          })(),
+          title: getComputedStyle(document.querySelector(".form-status strong")).fontWeight,
         }));
         check(
           `${tag}: while sending: 'Sending…', disabled, aria-busy, announced`,
@@ -406,14 +418,24 @@ function run(cmd, args, env) {
         );
         check(
           `${tag}: success only after the provider accepted it; polite status; form reset`,
-          (await status()) ===
-            "Thank you, your message has been sent. I'll reply to alex@example.com as soon as I can." &&
+          (await status()).replace(/\s+/g, " ").trim() ===
+            "Message sent successfully! Thank you for reaching out! I appreciate your interest and will get back to you as soon as possible." &&
             after.role === "status" &&
             after.live === "polite" &&
             after.busy === null &&
             after.values.every((v) => v === "") &&
             after.button === "Send message ↗",
           JSON.stringify(after),
+        );
+        check(
+          `${tag}: success state: green check icon (decorative), bold title, no visitor email shown`,
+          after.success &&
+            after.icon?.hidden === "true" &&
+            after.icon.size === "20x20" &&
+            after.icon.stroke === (theme === "dark" ? "rgb(74, 222, 128)" : "rgb(21, 128, 61)") &&
+            Number(after.title) >= 700 &&
+            !(await status()).includes("alex@example.com"),
+          JSON.stringify(after.icon) + " " + after.title,
         );
 
         await p
@@ -437,7 +459,8 @@ function run(cmd, args, env) {
           failed.startsWith(
             "Your message couldn't be sent right now. Your text is still in the form.",
           ) &&
-            !/has been sent/.test(failed) &&
+            !/sent successfully|has been sent/.test(failed) &&
+            !(await p.locator(".form-status-success").count()) &&
             (await p.inputValue("#contact-message")) === "Please keep this text.",
           failed,
         );
@@ -462,7 +485,7 @@ function run(cmd, args, env) {
           keys.length === 2 &&
             keys[0] &&
             keys[0] === keys[1] &&
-            (await status()).startsWith("Thank you"),
+            (await status()).startsWith("Message sent successfully!"),
           keys.join(" "),
         );
 

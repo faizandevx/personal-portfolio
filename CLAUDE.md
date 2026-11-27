@@ -302,8 +302,11 @@ intentional differences.
     - **With the key:**
       - "Send message ↗" with the note "Goes straight to my inbox. Nothing is stored on this site."
       - While sending: "Sending…", disabled, `aria-busy`, and one in-flight request at most.
-      - "Thank you, your message has been sent. I'll reply to <email>…" only after Resend returns an
-        id; the form then resets.
+      - Only after Resend returns an id, the status box turns into the success state
+        (`.form-status-success`, approved 2026-11-27): a subtle green tint and check icon (#4ade80
+        dark, #15803d light), the bold title "Message sent successfully!" and "Thank you for reaching
+        out! I appreciate your interest and will get back to you as soon as possible." It never shows
+        the visitor's email address. The form then resets.
       - Errors keep the typed text and offer "open it in your email app" (the mailto message) and
         "Copy email address".
       - Everything is announced through the existing polite `role="status"` region.
@@ -321,7 +324,7 @@ intentional differences.
       - errors are logged by status only, never with the message;
       - `no-store`; the CSP and other headers apply to `/api` too.
     - **Tests:**
-      - `npm run test:contact-delivery` (57 checks, about 3 minutes) builds with a mock provider on
+      - `npm run test:contact-delivery` (61 checks, about 3 minutes) builds with a mock provider on
         :4300, serves :3002, then rebuilds normally. It is not part of `test:regression`, because it
         needs its own build. Screenshots: `test-results/regression/screenshots/contact-delivery-*`.
       - `pages` (+1) checks the 503 and the unchanged mailto form on the key-less dev server.
@@ -330,6 +333,17 @@ intentional differences.
       faizandevx@gmail.com; another recipient or sender needs a verified domain.
     - Real delivery to Gmail is **not verified** until the user creates the Resend key and sends a
       test message (README steps 5–6).
+
+32. Contact "Email me" card (approved and released 2026-11-27). The card was already a correct
+    `mailto:` link, but on a computer with no email app (for example Windows with `mailto:` assigned
+    to Chrome and no web mail handler) a click does nothing visible. The whole card stays the V21
+    mailto link. A "Copy email" pill (`ContactSide.tsx` → `contact/CopyEmailButton.tsx`) sits in the
+    card's top-right corner as a **sibling** of the link inside `.contact-method-email`, never inside
+    it. It copies `PUBLIC_EMAIL` (Clipboard API, with an `execCommand` fallback), shows "Copied" for
+    2.5 s and announces it in a polite live region. The wrapper carries V21's card hover, so card and
+    pill lift 2px together; the pill turns orange on hover and keyboard focus (site-wide
+    `:focus-visible` outline). `pages` (+3) applies the markup to V21 and checks the mailto click, the
+    sibling structure, keyboard copy and the hover lift.
 
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
@@ -361,7 +375,7 @@ Read this first when resuming after a compaction or in a new session.
 - **Final pre-deployment improvements (started 2026-11-23):** Contact label and 404 fixes, the CV
   download, both professional photos and LinkedIn (changes 22–26). The full regression run waits until the
   final assets are integrated. Commit, push and deploy still need explicit approval.
-- **Regression totals:** 1,258 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 374, `contact` is 73. Contact delivery has its own 57 checks (`npm run test:contact-delivery`). Run only the affected suites during a step
+- **Regression totals:** 1,261 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 377, `contact` is 73. Contact delivery has its own 61 checks (`npm run test:contact-delivery`). Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
 - **External details still needed:** a Resend API key for contact delivery (change 31) and
   the final domain for `NEXT_PUBLIC_SITE_URL` (optional on Vercel; see README). Phases 4–7 are complete and pushed. Deploy only after the user

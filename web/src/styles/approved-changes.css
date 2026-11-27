@@ -353,3 +353,101 @@ a.connect-feature:focus-visible .soon-tag {
   opacity: 0.75;
   transform: none;
 }
+
+/*
+ * Contact form success (2026-11-27). Shown only after the email provider accepted the
+ * message: the V21 status box with a subtle green tint and a check icon, a bold title
+ * and the thank-you line below it. Green meets 3:1 (icon) on both themes' card colours.
+ */
+.form-status-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  --success: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+  border-color: rgba(74, 222, 128, 0.28);
+}
+html[data-theme="light"] .form-status-success {
+  --success: #15803d;
+  background: rgba(21, 128, 61, 0.06);
+  border-color: rgba(21, 128, 61, 0.24);
+}
+.form-status-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.form-status-icon circle {
+  fill: color-mix(in srgb, var(--success) 14%, transparent);
+  stroke-width: 1.5;
+}
+.form-status-text strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+.form-status-text > span {
+  display: block;
+  line-height: 1.55;
+}
+
+/*
+ * Contact "Email me" card (2026-11-27). The whole card stays the V21 mailto link. A
+ * "Copy email" button sits in its top-right corner as a sibling (never inside the
+ * link), for visitors whose computer has no email app. The wrapper carries V21's
+ * card hover, so the card and the button lift together, whichever one is hovered.
+ */
+.contact-method-email {
+  position: relative;
+  display: grid;
+}
+.contact-method-email:hover > a.contact-method {
+  transform: translateY(-2px);
+  border-color: rgba(249, 115, 56, 0.33);
+  background: var(--panel2);
+}
+.method-copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--side-card-bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
+}
+.contact-method-email:hover .method-copy-btn {
+  transform: translateY(-2px);
+  background: var(--panel2);
+}
+.method-copy-btn:hover,
+.method-copy-btn:focus-visible {
+  color: var(--orange);
+  border-color: rgba(249, 115, 56, 0.33);
+}
+@media (max-width: 1000px) {
+  .method-copy-btn {
+    top: 9px;
+    right: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .method-copy-btn {
+    transition: none;
+  }
+}
