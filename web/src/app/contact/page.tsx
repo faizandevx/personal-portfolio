@@ -2,6 +2,7 @@ import ContactForm from "@/components/contact/ContactForm";
 import ContactSide from "@/components/contact/ContactSide";
 import InsideHero from "@/components/hero/InsideHero";
 import JsonLd from "@/components/seo/JsonLd";
+import { isContactDeliveryConfigured } from "@/lib/contact-delivery";
 import { pageMetadata } from "@/lib/site";
 import { pageJsonLd } from "@/lib/structured-data";
 
@@ -56,7 +57,7 @@ export default function ContactPage() {
                 A few details are all I need to get the conversation started. Fields marked{" "}
                 <span className="required">*</span> are required.
               </p>
-              <ContactForm />
+              <ContactForm directDelivery={isContactDeliveryConfigured()} />
             </article>
             <ContactSide />
           </div>

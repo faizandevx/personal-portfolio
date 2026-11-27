@@ -15,6 +15,7 @@
     "test:visual": "playwright test --project=visual --pass-with-no-tests",
     "test": "playwright test --pass-with-no-tests",
     "test:regression": "node tests/regression/run.cjs",
+    "test:contact-delivery": "node tests/contact-delivery/run.cjs",
     "test:regression:list": "node tests/regression/run.cjs --list",
     "test:regression:parallel": "node tests/regression/run.cjs --jobs 3"
   },

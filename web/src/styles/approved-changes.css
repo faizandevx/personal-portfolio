@@ -335,3 +335,21 @@ a.connect-feature:focus-visible .soon-tag {
     transition: none;
   }
 }
+
+/*
+ * Contact form direct delivery (2026-11-27). The spam-trap field is in the DOM for
+ * bots but off-screen for people (it is also aria-hidden and out of the Tab order).
+ * While a message is sending, the button keeps its look but cannot be pressed again.
+ */
+.contact-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.send-btn:disabled {
+  cursor: progress;
+  opacity: 0.75;
+  transform: none;
+}

@@ -20,9 +20,9 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (1,257 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,258 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
-│  └─ .env.example     Environment variables (`NEXT_PUBLIC_SITE_URL` is optional; the rest are reserved)
+│  └─ .env.example     Environment variables (all optional: site URL, contact form delivery)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
 ├─ .gitattributes      LF line endings; design-reference/ is never converted
 ├─ .gitignore
@@ -58,10 +58,11 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 1,257 checks (about 55 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,258 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
+npm run test:contact-delivery             # contact form delivery with a mock provider (57 checks, own build)
 ```
 
 ## Tech stack
@@ -194,11 +195,15 @@ Phase 1 is complete and approved.
   come from `content/projects.ts` and are verified against this repository.
 - **Experience:** `/experience` is the V21 timeline. AlphaSoft360 and Aman Bank link to their websites
   (new tab). "View CV" opens the PDF in a new tab, and "Download CV" opens the CV modal.
-- **Contact:** the form validates and then opens the visitor's own email app with a prefilled message
-  ("Send via email"; "Opens your email app"). No message passes through this site, and nothing is
-  stored. If no email app opens, the status message shows the address with a "Copy email address"
-  button. The orange "Prefer a quick chat?" card opens WhatsApp (+92 347 3057550); email and LinkedIn
-  are the other working methods.
+- **Contact:** two modes, chosen by the server (see "Contact form delivery").
+  - **Direct delivery** (when `RESEND_API_KEY` is set): "Send message" posts the form to `/api/contact`,
+    which validates it and hands it to Resend. "Message sent" appears only after Resend accepts it;
+    otherwise an error keeps the typed text and offers the email app and "Copy email address".
+  - **Mailto fallback** (no key, the current production state): the form opens the visitor's own email
+    app with a prefilled message ("Send via email"; "Opens your email app"). If no email app opens, the
+    status message shows the address with a "Copy email address" button.
+  - Nothing is stored on the site in either mode. The orange "Prefer a quick chat?" card opens WhatsApp
+    (+92 347 3057550); email and LinkedIn are the other working methods.
 - **FAQ:** the V21 single-open accordion, keyboard accessible, with visitor-facing answers.
 - **Production:** skip link, drawer focus return, custom 404 page (`src/proxy.ts` gives unknown project
   URLs a real 404 status), canonical and Open Graph metadata,
@@ -259,15 +264,77 @@ Vercel settings: Framework Next.js, Root Directory `web`, default build (`next b
 (`npm install`, from `package-lock.json`) commands, Production Branch `main`. No `vercel.json` is
 needed. Next.js 16.4.6 needs Node.js 20.9 or later.
 
+## Contact form delivery
+
+**Choice (2026-11-27):** a Next.js route handler (`src/app/api/contact/route.ts`) that sends through
+[Resend](https://resend.com)'s REST API with plain `fetch`. No new dependency, no database, no CAPTCHA.
+
+- **Why Resend:** the free plan allows 100 emails a day and 3,000 a month, and Resend's shared sender
+  `onboarding@resend.dev` works without owning a domain. The API key stays on the server, and the
+  route controls validation, Reply-To and spam filtering.
+- **Why not Formspree:** its free plan allows 50 submissions a month, and messages pass through and are
+  stored by a third party.
+- **Why not Gmail SMTP:** it needs a Gmail app password on the server and an SMTP library.
+- **Mailto** stays as the automatic fallback whenever no key is configured.
+
+How it works: the browser validates the fields and posts JSON to `/api/contact`. The server then:
+
+1. accepts only same-origin JSON requests of 10 KB or less;
+2. validates every field again (required name, email and message, the form's length limits, a valid
+   email address, phone characters) and strips control characters and line breaks from one-line
+   fields, so they cannot inject email headers;
+3. rejects spam: a hidden honeypot field, a form submitted less than 3 seconds after it appeared,
+   and more than 3 links;
+4. limits each IP address to 5 messages per 10 minutes. This limit is kept in memory, so each
+   server instance counts separately; Resend's daily quota is the hard limit;
+5. sends a plain-text email (never HTML) to `CONTACT_TO_EMAIL`, with the subject "Portfolio enquiry
+   from <name>[: <subject>]", **Reply-To set to the visitor's address**, and an `Idempotency-Key`
+   from the page, so a retried message is never delivered twice;
+6. answers "sent" only when Resend returns a message id. Errors are logged by status only, never
+   with the message.
+
+### Setup (once, by the site owner)
+
+1. **Create a Resend account** at https://resend.com with **faizandevx@gmail.com** (free plan). This
+   address matters: Resend's shared sender `onboarding@resend.dev` delivers **only to the email
+   address of the Resend account**. Any other recipient gets a 403 ("You can only send testing emails
+   to your own email address"), which the site reports as a failed send. So `CONTACT_TO_EMAIL` must
+   stay the account's address. Resend calls `resend.dev` a testing domain; to send to another
+   recipient or from your own address, verify a domain under **Domains** (add the DNS records it
+   shows) and set `CONTACT_FROM_EMAIL`, for example `Portfolio Contact <contact@your-domain>`.
+2. In Resend, open **API Keys → Create API Key**. Give it a name (for example `portfolio-contact`) and
+   the **Sending access** permission. Copy the key (it starts with `re_`); it is shown only once.
+3. **Locally:** create `web/.env.local` (git-ignored) with `RESEND_API_KEY=re_…`. Then run
+   `npm run build && npm start` or `npm run dev`. The Contact page now shows "Send message".
+4. **On Vercel:** go to Project → Settings → Environment Variables and add `RESEND_API_KEY` for
+   **Production** (and Preview if wanted), marked **Sensitive**. `CONTACT_TO_EMAIL` and
+   `CONTACT_FROM_EMAIL` are optional. **Redeploy**: the contact page is prerendered, so the
+   form's mode is decided at build time.
+5. **Send one real test message:** on the live Contact page, fill in your own name, a second email
+   address you can read (so you can test Reply-To), and a short message. Wait at least 3 seconds,
+   then click "Send message". You should see "Thank you, your message has been sent…".
+6. **Confirm delivery in Gmail:** in faizandevx@gmail.com, look for "Portfolio enquiry from <your
+   name>" from "Portfolio Contact <onboarding@resend.dev>". Check **Spam** the first time and mark
+   it "Not spam". Click **Reply** and check that it goes to the address you entered. Resend's
+   **Emails** page also shows the message as Delivered.
+7. If it fails: the page shows an error and keeps the text. Resend's **Logs** show the API request.
+   In Vercel, open **Logs** and look for "Contact delivery failed: provider status …". A 401 means
+   a wrong key. A 403 means the recipient is not the Resend account's address (see step 1) or the
+   sender's domain is not verified. A 429 means Resend's rate limit or daily quota was reached.
+
+Tests: `npm run test:contact-delivery` builds the site with a mock provider (no real email, no real
+key) and checks the API and the form at 1440 and 390px in both themes. The `pages` regression suite
+covers the mailto fallback.
+
 ## Not connected yet (by design)
 
 These need details only the site owner can supply. Each one is labelled honestly on the site, and none
 is ever shown as working:
 
-| Item                | Current behaviour                               | Needed                      |
-| ------------------- | ----------------------------------------------- | --------------------------- |
-| Direct form sending | Form opens the visitor's email app instead      | A mail provider and API key |
-| Ask Faizan AI       | Labelled scripted demo with pre-written answers | An AI provider, if wanted   |
+| Item                | Current behaviour                               | Needed                    |
+| ------------------- | ----------------------------------------------- | ------------------------- |
+| Direct form sending | Built; mailto until `RESEND_API_KEY` is set     | A Resend API key (above)  |
+| Ask Faizan AI       | Labelled scripted demo with pre-written answers | An AI provider, if wanted |
 
 ### Final assets
 

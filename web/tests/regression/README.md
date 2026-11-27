@@ -81,7 +81,11 @@ empty photo element of the same size, pixel comparisons mask `#hero .photo-panel
 | `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                                      |
 | `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                                                  |
 | `about-page`    |    284 | 3 + At a glance photo: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
-| `pages`         |    373 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email, copy, WhatsApp card), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                |
+| `pages`         |    374 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email, copy, WhatsApp card), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                |
+
+Contact form direct delivery (with a mock email provider) has its own script, outside this
+runner because it needs its own build: `npm run test:contact-delivery` (57 checks; see
+`../contact-delivery/run.cjs`). `pages` checks the mailto fallback.
 
 `pages` covers `/projects`, the case study, `/experience`, `/contact` and `/faq` at 8 widths in both
 themes, plus the skip link, 404 page, SEO files, security headers and client-side navigation. Use

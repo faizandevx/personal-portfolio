@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PUBLIC_EMAIL } from "@/lib/site";
 
-// Builds the prefilled email that the form opens. There is no mail service behind
-// this site, so the visitor's own email app does the sending.
+// Builds the prefilled email that the mailto form opens: the visitor's own email app
+// does the sending. It is also the way out when direct delivery fails.
 function buildMailto(data: FormData) {
   const text = (name: string) => String(data.get(name) ?? "").trim();
   const name = text("name");
@@ -19,11 +19,70 @@ function buildMailto(data: FormData) {
   return `mailto:${PUBLIC_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\r\n"))}`;
 }
 
+type Status =
+  | { kind: "idle" }
+  | { kind: "mailto" }
+  | { kind: "sending" }
+  | { kind: "sent"; email: string }
+  | { kind: "error"; reason: "invalid" | "rate_limited" | "failed" };
+
+const ERRORS = {
+  invalid: "Please check your name, email address and message, then try again.",
+  rate_limited:
+    "You've sent several messages in a short time. Please wait a few minutes before trying again.",
+  failed: "Your message couldn't be sent right now.",
+};
+
 // The V21 contact form (design-reference/contact.html). Required fields use the
-// browser's own validation; a valid form opens a prefilled email.
-export default function ContactForm() {
-  const [submitted, setSubmitted] = useState(false);
+// browser's own validation. With direct delivery configured (directDelivery, decided on
+// the server), a valid form is posted to /api/contact and only a reply from the email
+// provider counts as sent; otherwise it opens a prefilled email (mailto).
+export default function ContactForm({ directDelivery = false }: { directDelivery?: boolean }) {
+  const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [copied, setCopied] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const sending = useRef(false);
+  // When the form became usable (the server rejects instant, automated submissions).
+  const shownAt = useRef(0);
+  // One key per message, kept for retries so a retried message is never delivered twice.
+  const submissionId = useRef<string | null>(null);
+
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, []);
+
+  const send = async (form: HTMLFormElement) => {
+    if (sending.current) return;
+    sending.current = true;
+    setStatus({ kind: "sending" });
+    const data = Object.fromEntries(new FormData(form));
+    submissionId.current ??= crypto.randomUUID();
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          elapsedMs: Date.now() - shownAt.current,
+          submissionId: submissionId.current,
+        }),
+      });
+      if (response.ok) {
+        setStatus({ kind: "sent", email: String(data.email) });
+        form.reset();
+        submissionId.current = null;
+      } else {
+        const reason =
+          response.status === 429 ? "rate_limited" : response.status === 400 ? "invalid" : "failed";
+        const body = await response.json().catch(() => null);
+        setStatus({ kind: "error", reason: body?.error === "rejected" ? "failed" : reason });
+      }
+    } catch {
+      setStatus({ kind: "error", reason: "failed" });
+    } finally {
+      sending.current = false;
+    }
+  };
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,8 +93,13 @@ export default function ContactForm() {
       input.value = input.value.trim();
     }
     if (!form.reportValidity()) return;
+    setCopied(false);
+    if (directDelivery) {
+      void send(form);
+      return;
+    }
     window.location.href = buildMailto(new FormData(form));
-    setSubmitted(true);
+    setStatus({ kind: "mailto" });
   };
 
   // For visitors without an email app: copy the address so any mail service can use it.
@@ -49,8 +113,26 @@ export default function ContactForm() {
     }
   };
 
+  const copyButton = (
+    <button className="copy-email" type="button" onClick={copyEmail}>
+      {copied ? "Address copied" : "Copy email address"}
+    </button>
+  );
+  const isSending = status.kind === "sending";
+
   return (
-    <form action="#" className="demo-form contact-form" method="post" onSubmit={onSubmit}>
+    <form
+      ref={formRef}
+      action="#"
+      aria-busy={isSending || undefined}
+      className="demo-form contact-form"
+      method="post"
+      onSubmit={onSubmit}
+      // Editing the message after a failed attempt makes it a new message.
+      onInput={() => {
+        submissionId.current = null;
+      }}
+    >
       <div className="contact-fields">
         <div className="field">
           <label htmlFor="contact-name">
@@ -129,23 +211,65 @@ export default function ContactForm() {
             rows={6}
           ></textarea>
         </div>
+        {directDelivery && (
+          // Spam trap: hidden from people and skipped by the keyboard; bots fill it in.
+          <div aria-hidden="true" className="contact-trap">
+            <label htmlFor="contact-website">Leave this field empty</label>
+            <input autoComplete="off" id="contact-website" name="website" tabIndex={-1} />
+          </div>
+        )}
       </div>
       <div className="contact-submit-row">
-        <button className="btn btn-primary send-btn" type="submit">
-          Send via email <span aria-hidden="true">↗</span>
-        </button>
+        {directDelivery ? (
+          <button
+            aria-disabled={isSending || undefined}
+            className="btn btn-primary send-btn"
+            disabled={isSending}
+            type="submit"
+          >
+            {isSending ? "Sending…" : "Send message"} <span aria-hidden="true">↗</span>
+          </button>
+        ) : (
+          <button className="btn btn-primary send-btn" type="submit">
+            Send via email <span aria-hidden="true">↗</span>
+          </button>
+        )}
         <p className="privacy-note">
-          <span aria-hidden="true">◇</span> Opens your email app. Nothing is stored on this site.
+          {/* One text node after the icon, as in V21. */}
+          <span aria-hidden="true">◇</span>
+          {directDelivery
+            ? " Goes straight to my inbox. Nothing is stored on this site."
+            : " Opens your email app. Nothing is stored on this site."}
         </p>
       </div>
-      <p aria-live="polite" className="form-status" hidden={!submitted} role="status">
-        {submitted && (
+      <p aria-live="polite" className="form-status" hidden={status.kind === "idle"} role="status">
+        {status.kind === "mailto" && (
           <>
             Your email app should open with your message ready to send. If it doesn&apos;t, please
-            email me at <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>.{" "}
-            <button className="copy-email" type="button" onClick={copyEmail}>
-              {copied ? "Address copied" : "Copy email address"}
+            email me at <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>. {copyButton}
+          </>
+        )}
+        {status.kind === "sending" && "Sending your message…"}
+        {status.kind === "sent" && (
+          <>
+            Thank you, your message has been sent. I&apos;ll reply to {status.email} as soon as I
+            can.
+          </>
+        )}
+        {status.kind === "error" && (
+          <>
+            {ERRORS[status.reason]} Your text is still in the form. You can try again,{" "}
+            <button
+              className="copy-email"
+              type="button"
+              onClick={() => {
+                if (formRef.current)
+                  window.location.href = buildMailto(new FormData(formRef.current));
+              }}
+            >
+              open it in your email app
             </button>
+            , or email me at <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>. {copyButton}
           </>
         )}
       </p>

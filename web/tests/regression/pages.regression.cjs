@@ -779,6 +779,23 @@ const BEHAVIOUR = {
         requests.length === 0,
       requests.join(", "),
     );
+    // Direct delivery is off without RESEND_API_KEY (as on this dev server): the API says so
+    // and the page keeps the mailto form unchanged (tests/contact-delivery covers it on).
+    const api = await q.evaluate(async () => {
+      const r = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      return `${r.status} ${(await r.json()).error}`;
+    });
+    check(
+      "no delivery key: /api/contact answers 503 not_configured; the form stays mailto (no spam trap)",
+      api === "503 not_configured" &&
+        (await q.locator(".contact-trap").count()) === 0 &&
+        (await q.locator(".send-btn").innerText()).startsWith("Send via email"),
+      api,
+    );
     // Without an email app, the visitor can copy the address from the status message.
     await q.context().grantPermissions(["clipboard-read", "clipboard-write"]);
     await q.click(".form-status .copy-email");

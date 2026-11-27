@@ -5,10 +5,10 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // The regression suites are plain Node.js CommonJS scripts (.cjs), where
+  // The regression and contact-delivery suites are plain Node.js CommonJS scripts (.cjs), where
   // require() is the correct way to load modules.
   {
-    files: ["tests/regression/**/*.cjs"],
+    files: ["tests/regression/**/*.cjs", "tests/contact-delivery/**/*.cjs"],
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   // Override default ignores of eslint-config-next.

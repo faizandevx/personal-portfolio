@@ -19,7 +19,8 @@ See `README.md` for commands and phase status.
    the approved sticky behaviour.
 5. **No fake functionality.** Demo-only features (contact delivery, AI) must be clearly marked as
    unavailable or scripted until they are really connected. The CV download and WhatsApp are
-   connected (changes 24 and 30).
+   connected (changes 24 and 30). Contact delivery is built (change 31) but says "sent" only after
+   the email provider accepts a message; without a key the form stays mailto.
 6. **No confidential data.** Never publish private repository URLs, client or banking
    implementation details, internal names, or credentials. Private projects get summaries only.
 7. **Keep the docs accurate.** Update `README.md` (phase status, commands, structure) and this
@@ -172,8 +173,8 @@ intentional differences.
     repository, and no screenshot panel until real screenshots exist. New labels use
     `.page-section-label` (15px). Experience uses V21's text with AlphaSoft360 (employer names are
     links since change 29).
-20. Contact and FAQ. No mail service or credentials exist, so the form validates and then opens the
-    visitor's own email app with a prefilled message; it never claims a message was sent. FAQ answers
+20. Contact and FAQ. Without a mail service the form validates and then opens the visitor's own
+    email app with a prefilled message; it never claims a message was sent (direct delivery: change 31). FAQ answers
     that described the preview are reworded (`content/faq.ts`), and each answer is a named region.
 21. Phase 6 shell. A skip link is the first Tab stop (off-screen until focused; every `<main>` has
     `id="main-content"`). Escape on the mobile drawer returns focus to the menu button. The pending
@@ -289,6 +290,47 @@ intentional differences.
       keyboard, hover and focus against V21, and that every WhatsApp link and number on the site is
       the approved one; `pages` applies the card markup to V21 and checks the card and the copy button.
 
+31. Contact form direct delivery (approved and released 2026-11-27). `app/api/contact/route.ts`
+    sends through Resend's REST API with `fetch` (no new dependency). Configuration is in
+    `lib/contact-delivery.ts`: `RESEND_API_KEY` (server-only), plus optional `CONTACT_TO_EMAIL`
+    (default `PUBLIC_EMAIL`) and `CONTACT_FROM_EMAIL` (default `Portfolio Contact
+<onboarding@resend.dev>`). `RESEND_API_URL` is for tests only. Validation and spam rules are in
+    `lib/contact-message.ts`. README "Contact form delivery" covers the rationale and setup.
+    - The contact page passes `directDelivery` to `ContactForm` at build time (prerendered; redeploy
+      after changing the variables). **Without the key nothing changes:** the V21 mailto form, text and
+      DOM are as before, and `/api/contact` answers 503 `not_configured`.
+    - **With the key:**
+      - "Send message ↗" with the note "Goes straight to my inbox. Nothing is stored on this site."
+      - While sending: "Sending…", disabled, `aria-busy`, and one in-flight request at most.
+      - "Thank you, your message has been sent. I'll reply to <email>…" only after Resend returns an
+        id; the form then resets.
+      - Errors keep the typed text and offer "open it in your email app" (the mailto message) and
+        "Copy email address".
+      - Everything is announced through the existing polite `role="status"` region.
+      - A honeypot field (`.contact-trap`: off-screen, `aria-hidden`, `tabIndex=-1`) exists only in
+        this mode.
+    - **Server:**
+      - same-origin JSON only, 10 KB maximum;
+      - field validation mirroring the form's `maxLength` values;
+      - control characters and line breaks are stripped from one-line fields (no header injection);
+      - spam is rejected: honeypot, under 3 s since the form appeared, more than 3 links;
+      - 5 messages per 10 minutes per IP (in memory, per instance);
+      - plain text only, Reply-To the visitor, subject "Portfolio enquiry from <name>[: <subject>]";
+      - the `Idempotency-Key` is reused on retries;
+      - failures (provider error, quota, bad key, timeout) are never reported as sent;
+      - errors are logged by status only, never with the message;
+      - `no-store`; the CSP and other headers apply to `/api` too.
+    - **Tests:**
+      - `npm run test:contact-delivery` (57 checks, about 3 minutes) builds with a mock provider on
+        :4300, serves :3002, then rebuilds normally. It is not part of `test:regression`, because it
+        needs its own build. Screenshots: `test-results/regression/screenshots/contact-delivery-*`.
+      - `pages` (+1) checks the 503 and the unchanged mailto form on the key-less dev server.
+    - Resend's shared `onboarding@resend.dev` sender delivers only to the Resend account's own
+      address (403 otherwise; Resend docs, checked 2026-11-27). The account must use
+      faizandevx@gmail.com; another recipient or sender needs a verified domain.
+    - Real delivery to Gmail is **not verified** until the user creates the Resend key and sends a
+      test message (README steps 5–6).
+
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
 `display:none`, so tests after client-side navigation must target visible elements (`h1:visible`).
@@ -319,9 +361,9 @@ Read this first when resuming after a compaction or in a new session.
 - **Final pre-deployment improvements (started 2026-11-23):** Contact label and 404 fixes, the CV
   download, both professional photos and LinkedIn (changes 22–26). The full regression run waits until the
   final assets are integrated. Commit, push and deploy still need explicit approval.
-- **Regression totals:** 1,257 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 373, `contact` is 73. Run only the affected suites during a step
+- **Regression totals:** 1,258 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 374, `contact` is 73. Contact delivery has its own 57 checks (`npm run test:contact-delivery`). Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
-- **External details still needed:** mail provider (optional) and
+- **External details still needed:** a Resend API key for contact delivery (change 31) and
   the final domain for `NEXT_PUBLIC_SITE_URL` (optional on Vercel; see README). Phases 4–7 are complete and pushed. Deploy only after the user
   approves.
 - **Deployment preparation (2026-11-24):** Next.js was upgraded from 16.4.3 to 16.4.6 (approved patch for 7
@@ -367,7 +409,12 @@ Read this first when resuming after a compaction or in a new session.
   `contact` 73/73, `homepage` 52/52, `pages` 373/373, plus lint, typecheck, format and build.
 - **Combined release (approved 2026-11-26):** changes 29 and 30 and the CSP in one signed commit.
   Full regression before it: 1,257/1,257 (`npm run test:regression -- --jobs 2`, 33 min); lint,
-  typecheck, format, build pass, and `npm audit --omit=dev` finds 0 vulnerabilities.
+  typecheck, format, build pass, and `npm audit --omit=dev` finds 0 vulnerabilities. Pushed as
+  `dfa6a46` and deployed; live checks passed.
+- **Contact form direct delivery (2026-11-27):** change 31. The user set `RESEND_API_KEY` (Production,
+  Sensitive) on Vercel; committed with the user's approval as "feat(contact): enable secure direct email
+  delivery via Resend", pushed and deployed. Next step: the user sends one real test message and
+  confirms it in Gmail. Do not claim delivery works until they do.
 - Keep `.local/regression-2e/` as a backup. Do not delete it.
 
 ## Git
