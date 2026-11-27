@@ -398,22 +398,98 @@ html[data-theme="light"] .form-status-success {
 }
 
 /*
- * Contact "Email me" card (2026-11-27). The whole card stays the V21 mailto link. A
- * "Copy email" button sits in its top-right corner as a sibling (never inside the
- * link), for visitors whose computer has no email app. The wrapper carries V21's
- * card hover, so the card and the button lift together, whichever one is hovered.
+ * Contact "Email me" card (2026-11-27). The card looks exactly like V21's, but it is a
+ * button that opens a small list of email options (Gmail, the email app, copy), so a
+ * click always does something visible. A "Copy email" pill sits in its top-right
+ * corner as a sibling (never inside the card). The wrapper carries V21's card hover,
+ * so the card and the pill lift together; an open card keeps the hover border.
  */
 .contact-method-email {
   position: relative;
   display: grid;
 }
-.contact-method-email:hover > a.contact-method {
+button.contact-method {
+  width: 100%;
+  color: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.contact-method-email:hover > .contact-method {
   transform: translateY(-2px);
   border-color: rgba(249, 115, 56, 0.33);
   background: var(--panel2);
 }
+.contact-method[aria-expanded="true"] {
+  border-color: rgba(249, 115, 56, 0.33);
+}
+.email-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 2px;
+  width: min(250px, 100%);
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--side-card-bg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+  animation: email-options-in 0.18s ease;
+}
+html[data-theme="light"] .email-options {
+  box-shadow: 0 16px 36px rgba(22, 29, 38, 0.13);
+}
+.email-options[hidden] {
+  display: none;
+}
+.email-options a,
+.email-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  outline-offset: -2px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.email-options a:hover,
+.email-options a:focus-visible,
+.email-options button:hover,
+.email-options button:focus-visible {
+  background: var(--contact-soft);
+  color: var(--orange);
+}
+.email-options [aria-hidden="true"] {
+  color: var(--orange);
+}
+@keyframes email-options-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (max-width: 560px) {
+  .email-options {
+    width: 100%;
+  }
+}
 .method-copy-btn {
   position: absolute;
+  z-index: 1;
   top: 12px;
   right: 14px;
   padding: 3px 10px;
@@ -447,7 +523,12 @@ html[data-theme="light"] .form-status-success {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .method-copy-btn {
+  .method-copy-btn,
+  .email-options a,
+  .email-options button {
     transition: none;
+  }
+  .email-options {
+    animation: none;
   }
 }

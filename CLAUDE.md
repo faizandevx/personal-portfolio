@@ -342,8 +342,23 @@ intentional differences.
     it. It copies `PUBLIC_EMAIL` (Clipboard API, with an `execCommand` fallback), shows "Copied" for
     2.5 s and announces it in a polite live region. The wrapper carries V21's card hover, so card and
     pill lift 2px together; the pill turns orange on hover and keyboard focus (site-wide
-    `:focus-visible` outline). `pages` (+3) applies the markup to V21 and checks the mailto click, the
-    sibling structure, keyboard copy and the hover lift.
+    `:focus-visible` outline).
+    - **Email options (approved and released 2026-11-27).** The pill alone did not fix the card:
+      clicking the card still did nothing visible. The card is now a `<button>` (`contact/EmailCard.tsx`)
+      with V21's look, arrow, hover and layout (`button.contact-method` resets the button styles). A
+      click opens a small options list below it (`#email-options`, `role="group"`, "Email options";
+      disclosure pattern with `aria-expanded`/`aria-controls`):
+      - "Compose in Gmail ↗": `https://mail.google.com/mail/?view=cm&fs=1&to=faizandevx@gmail.com`,
+        new tab, `rel="noopener noreferrer"`;
+      - "Open email application": the existing `mailto:` link;
+      - "Copy email address": copies (`lib/clipboard.ts`), shows "Email address copied ✓", announced.
+      - Escape closes and returns focus to the card; a click elsewhere, choosing a link or tabbing out
+        closes it; ArrowUp/ArrowDown move between the options. The open card keeps the hover border.
+        Full width at 560px and below. Fade-in turned off for reduced motion.
+      - The "Copy email" pill stays (now `z-index: 1`, above the card button).
+    - `pages` (+4) applies the markup to V21 and checks that a click on the card itself shows the
+      options (and starts no mailto), the Gmail URL and mailto, closing, the keyboard flow, axe while
+      open, the pill and the hover lift. Gmail is stubbed in the test.
 
 `harness.cjs` applies the site-wide markup changes above to every V21 page; `pages.regression.cjs`
 applies the page-specific ones. With Cache Components, visited routes stay in the DOM with
@@ -375,7 +390,7 @@ Read this first when resuming after a compaction or in a new session.
 - **Final pre-deployment improvements (started 2026-11-23):** Contact label and 404 fixes, the CV
   download, both professional photos and LinkedIn (changes 22–26). The full regression run waits until the
   final assets are integrated. Commit, push and deploy still need explicit approval.
-- **Regression totals:** 1,261 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 377, `contact` is 73. Contact delivery has its own 61 checks (`npm run test:contact-delivery`). Run only the affected suites during a step
+- **Regression totals:** 1,262 checks (`npm run test:regression`, about 55 min). `about-page` is 284, `pages` is 378, `contact` is 73. Contact delivery has its own 61 checks (`npm run test:contact-delivery`). Run only the affected suites during a step
   (`npm run test:regression -- about-page footer`), and the full run at the end of a phase.
 - **External details still needed:** a Resend API key for contact delivery (change 31) and
   the final domain for `NEXT_PUBLIC_SITE_URL` (optional on Vercel; see README). Phases 4–7 are complete and pushed. Deploy only after the user

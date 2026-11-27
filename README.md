@@ -20,7 +20,7 @@ personal-portfolio/
 │  ├─ src/lib/         Helpers (routes, …)
 │  ├─ src/styles/legacy/  Approved V21 stylesheet, verbatim (added in Phase 1)
 │  ├─ tests/e2e/       Playwright smoke tests
-│  ├─ tests/regression/  V21 parity + behaviour suites (1,261 checks; see its README.md)
+│  ├─ tests/regression/  V21 parity + behaviour suites (1,262 checks; see its README.md)
 │  ├─ tests/visual/    Reserved for toHaveScreenshot parity specs (empty)
 │  └─ .env.example     Environment variables (all optional: site URL, contact form delivery)
 ├─ .prettierignore     Stops Prettier (CLI + VS Code) from formatting design-reference/ and legacy CSS
@@ -58,7 +58,7 @@ npm run reference           # serve design-reference/ read-only → http://local
 npm run test:e2e            # behaviour tests in installed Chrome (starts the dev + reference servers)
 npm run test:visual         # screenshot parity tests
 npm test                    # all Playwright tests
-npm run test:regression     # V21 parity + behaviour suites, 1,261 checks (about 55 min)
+npm run test:regression     # V21 parity + behaviour suites, 1,262 checks (about 55 min)
 npm run test:regression -- hero contact   # selected suites
 npm run test:regression:list              # suites and expected check counts
 npm run test:regression:parallel          # same checks, up to 3 suites at once (faster)
@@ -203,7 +203,9 @@ Phase 1 is complete and approved.
     app with a prefilled message ("Send via email"; "Opens your email app"). If no email app opens, the
     status message shows the address with a "Copy email address" button.
   - Nothing is stored on the site in either mode. The orange "Prefer a quick chat?" card opens WhatsApp
-    (+92 347 3057550); email and LinkedIn are the other working methods.
+    (+92 347 3057550). The "Email me" card opens a small list of email options (Gmail's web composer,
+    the visitor's email app, copy the address), and its "Copy email" pill copies the address
+    directly. LinkedIn is the other working method.
 - **FAQ:** the V21 single-open accordion, keyboard accessible, with visitor-facing answers.
 - **Production:** skip link, drawer focus return, custom 404 page (`src/proxy.ts` gives unknown project
   URLs a real 404 status), canonical and Open Graph metadata,

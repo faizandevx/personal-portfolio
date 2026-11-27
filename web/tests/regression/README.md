@@ -81,7 +81,7 @@ empty photo element of the same size, pixel comparisons mask `#hero .photo-panel
 | `cv-scrollbar`  |      6 | 1: CV modal scroll lock with classic scrollbars                                                                                                                                                                                      |
 | `homepage`      |     52 | 2E + 6: whole page (structure, links, Tab order, axe, motion, overflow, a11y fixes)                                                                                                                                                  |
 | `about-page`    |    284 | 3 + At a glance photo: `/about` vs `about.html` (3B hero, workflow, spacing; 3C story, at a glance, journey; 3D capabilities, approach, education, CTA; 3E whole page: sections, full-page pixels, keyboard, drawer, motion, routes) |
-| `pages`         |    377 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email, copy, WhatsApp card), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                                |
+| `pages`         |    378 | 4–6 + pre-deployment fixes: `/projects`, case study, `/experience`, `/contact` (form, email options, copy, WhatsApp card), `/faq` (accordion) vs V21; skip link, 404, SEO files, security headers, navigation                        |
 
 Contact form direct delivery (with a mock email provider) has its own script, outside this
 runner because it needs its own build: `npm run test:contact-delivery` (61 checks; see

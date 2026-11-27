@@ -50,11 +50,11 @@ const SUITES = [
   // 369 checks from Phases 4-6 + 2 for the approved 2026-11-23 fixes (Contact hero
   // label wrapping, 404 footer on tall screens) + 2 for the 2026-11-26 WhatsApp card
   // (hover and focus) and the form's "Copy email address" fallback + 1 for the contact
-  // API's answer without a delivery key (2026-11-27) + 3 for the email card's "Copy email"
-  // button (mailto card and sibling button, keyboard copy, hover lift; 2026-11-27).
+  // API's answer without a delivery key (2026-11-27) + 4 for the email card (2026-11-27): a
+  // click shows the email options, the options work, keyboard and axe, the "Copy email" pill.
   [
     "pages",
-    377,
+    378,
     "Phases 4-6: /projects, case study, /experience, /contact, /faq vs V21; skip link, 404, SEO files, headers",
   ],
 ];

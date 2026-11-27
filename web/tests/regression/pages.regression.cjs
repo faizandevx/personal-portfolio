@@ -123,15 +123,26 @@ const APPLY = {
     feature.replaceWith(whatsApp);
     // WCAG 2.5.3: the link's name comes from its visible text.
     document.querySelector("a.contact-method").removeAttribute("aria-label");
-    // Approved 2026-11-27: "Copy email" beside the email card (a sibling, not inside the link).
+    // Approved 2026-11-27: the email card is a button that opens a list of email options
+    // (hidden until opened), with a "Copy email" pill beside it.
     const email = document.querySelector('a.contact-method[href^="mailto:"]');
     const emailWrap = document.createElement("div");
     emailWrap.className = "contact-method-email";
+    const emailCard = document.createElement("button");
+    emailCard.className = "contact-method";
+    emailCard.type = "button";
+    emailCard.setAttribute("aria-controls", "email-options");
+    emailCard.setAttribute("aria-expanded", "false");
+    emailCard.innerHTML = email.innerHTML;
     email.replaceWith(emailWrap);
-    emailWrap.append(email);
+    emailWrap.append(emailCard);
     emailWrap.insertAdjacentHTML(
       "beforeend",
-      '<button class="method-copy-btn" type="button">Copy email</button><span aria-live="polite" class="sr-only"></span>',
+      '<div aria-label="Email options" class="email-options" hidden id="email-options" role="group">' +
+        '<a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=faizandevx@gmail.com" rel="noopener noreferrer" target="_blank">Compose in Gmail <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>' +
+        '<a href="mailto:faizandevx@gmail.com">Open email application</a>' +
+        '<button type="button">Copy email address</button><span aria-live="polite" class="sr-only"></span></div>' +
+        '<button class="method-copy-btn" type="button">Copy email</button><span aria-live="polite" class="sr-only"></span>',
     );
     // Approved 2026-11-24 (change 26): the LinkedIn card links to the confirmed profile.
     const card = document.querySelector(".contact-side small").closest(".contact-method");
@@ -824,13 +835,13 @@ const BEHAVIOUR = {
       text: a.innerText.replace(/\s+/g, " "),
     }));
     check(
-      "WhatsApp card opens https://wa.me/923473057550 in a new tab and shows +92 347 3057550; email links to mailto; LinkedIn opens the confirmed profile; no other WhatsApp link",
+      "WhatsApp card opens https://wa.me/923473057550 in a new tab and shows +92 347 3057550; email options include mailto; LinkedIn opens the confirmed profile; no other WhatsApp link",
       card.href === "https://wa.me/923473057550" &&
         card.target === "_blank" &&
         card.rel === "noopener noreferrer" &&
         card.text.includes("+92 347 3057550") &&
         !/coming soon/i.test(card.text) &&
-        (await q.locator('a.contact-method[href="mailto:faizandevx@gmail.com"]').count()) === 1 &&
+        (await q.locator('#email-options a[href="mailto:faizandevx@gmail.com"]').count()) === 1 &&
         (await q
           .locator(
             'main a.contact-method[href="https://www.linkedin.com/in/faizan-ali-5aa430380"][target="_blank"][rel="noopener noreferrer"]',
@@ -853,13 +864,13 @@ const BEHAVIOUR = {
       "field focus style matches V21",
       (await read(ref, "#contact-name")) === (await read(app, "#contact-name")),
     );
-    await ref.hover('a.contact-method[href^="mailto:"]');
-    await app.hover('a.contact-method[href^="mailto:"]');
+    await ref.hover(".contact-method-email > .contact-method");
+    await app.hover(".contact-method-email > .contact-method");
     await app.waitForTimeout(500);
     check(
       "email method hover matches V21",
-      (await read(ref, 'a.contact-method[href^="mailto:"]')) ===
-        (await read(app, 'a.contact-method[href^="mailto:"]')),
+      (await read(ref, ".contact-method-email > .contact-method")) ===
+        (await read(app, ".contact-method-email > .contact-method")),
     );
     // The WhatsApp card is a link now: it lifts 2px on hover and shows the orange focus
     // outline from the keyboard (V21's card was static, so the app is checked alone).
@@ -890,90 +901,209 @@ const BEHAVIOUR = {
         focused.outline.startsWith("solid 2px"),
       JSON.stringify({ idle, hovered, focused }),
     );
-    // Email card (2026-11-27): the whole card is the mailto link, and "Copy email" is a
-    // sibling button for visitors whose computer has no email app.
-    const emailCard = 'a.contact-method[href^="mailto:"]';
+    // Email card (2026-11-27): clicking the card itself opens a list of email options
+    // (Gmail, the email app, copy); a plain mailto click did nothing visible on computers
+    // without an email app. "Copy email" in the corner stays available.
+    const emailCard = ".contact-method-email > .contact-method";
+    const options = "#email-options";
     const mailNav = [];
     const emailCdp = await app.context().newCDPSession(app);
     await emailCdp.send("Page.enable");
     emailCdp.on("Page.frameRequestedNavigation", (e) => mailNav.push(e.url));
     await app.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    const structure = await app.evaluate((sel) => {
-      const a = document.querySelector(sel);
-      const btn = document.querySelector(".method-copy-btn");
-      const ar = a.getBoundingClientRect();
-      const br = btn.getBoundingClientRect();
-      return {
-        nested: a.contains(btn) || !!a.querySelector("a, button"),
-        sibling: btn.parentElement === a.parentElement,
-        inCard:
-          br.left >= ar.left && br.right <= ar.right && br.top >= ar.top && br.bottom <= ar.bottom,
-        name: btn.textContent,
-        type: btn.type,
-      };
-    }, emailCard);
+    // Gmail's composer is stubbed: the check needs its address, not Google's page.
+    await app
+      .context()
+      .route("https://mail.google.com/**", (r) =>
+        r.fulfill({ contentType: "text/html", body: "<title>Gmail stub</title>" }),
+      );
+    const popover = () =>
+      app.evaluate(
+        ([c, o]) => {
+          const list = document.querySelector(o);
+          return {
+            expanded: document.querySelector(c).getAttribute("aria-expanded"),
+            visible: !list.hidden && list.getBoundingClientRect().height > 0,
+            focus: document.activeElement.textContent.trim().replace(/\s+/g, " "),
+          };
+        },
+        [emailCard, options],
+      );
     await app.mouse.move(1, 1);
-    await app.click(`${emailCard} .method-copy strong`);
+    const closed = await popover();
+    await app.locator(emailCard).click();
     await app.waitForTimeout(300);
+    const opened = await popover();
+    const shape = await app.evaluate(
+      ([c, o]) => {
+        const btn = document.querySelector(c);
+        const list = document.querySelector(o);
+        return {
+          tag: btn.tagName,
+          nested: !!btn.querySelector("a, button"),
+          inside: btn.contains(list),
+          controls: btn.getAttribute("aria-controls"),
+          group: `${list.getAttribute("role")} ${list.getAttribute("aria-label")}`,
+          items: [...list.querySelectorAll("a, button")].map((i) => ({
+            text: i.innerText.replace(/\s+/g, " ").trim(),
+            href: i.getAttribute("href"),
+            target: i.getAttribute("target"),
+            rel: i.getAttribute("rel"),
+          })),
+        };
+      },
+      [emailCard, options],
+    );
     check(
-      "Email card: the whole card is the mailto link (a click opens mailto:faizandevx@gmail.com); 'Copy email' sits in the card as a sibling button, not inside the link",
-      mailNav.join() === "mailto:faizandevx@gmail.com" &&
-        !structure.nested &&
-        structure.sibling &&
-        structure.inCard &&
-        structure.name === "Copy email" &&
-        structure.type === "button",
-      JSON.stringify({ structure, mailNav }),
+      "Email card: a click on the card itself shows the email options (Gmail composer in a new tab, email app via mailto, copy) and starts no mailto; no nested controls",
+      closed.expanded === "false" &&
+        !closed.visible &&
+        opened.expanded === "true" &&
+        opened.visible &&
+        mailNav.length === 0 &&
+        shape.tag === "BUTTON" &&
+        !shape.nested &&
+        !shape.inside &&
+        shape.controls === "email-options" &&
+        shape.group === "group Email options" &&
+        JSON.stringify(shape.items) ===
+          JSON.stringify([
+            {
+              text: "Compose in Gmail ↗ (opens in a new tab)",
+              href: "https://mail.google.com/mail/?view=cm&fs=1&to=faizandevx@gmail.com",
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+            {
+              text: "Open email application",
+              href: "mailto:faizandevx@gmail.com",
+              target: null,
+              rel: null,
+            },
+            { text: "Copy email address", href: null, target: null, rel: null },
+          ]),
+      JSON.stringify({ closed, opened, shape, mailNav }),
+    );
+    const [gmail] = await Promise.all([
+      app.context().waitForEvent("page"),
+      app.click(`${options} a[target=_blank]`),
+    ]);
+    await gmail.waitForLoadState();
+    const gmailUrl = gmail.url();
+    await gmail.close();
+    const afterGmail = await popover();
+    await app.locator(emailCard).click();
+    await app.waitForTimeout(200);
+    await app.click(`${options} a[href^="mailto:"]`);
+    await app.waitForTimeout(300);
+    const afterMailto = await popover();
+    await app.locator(emailCard).click();
+    await app.waitForTimeout(200);
+    await app.mouse.click(5, 5);
+    await app.waitForTimeout(200);
+    const afterOutside = await popover();
+    check(
+      "Email options: Gmail opens its composer to faizandevx@gmail.com in a new tab; 'Open email application' starts mailto:faizandevx@gmail.com; each closes the list, and so does a click elsewhere",
+      gmailUrl === "https://mail.google.com/mail/?view=cm&fs=1&to=faizandevx@gmail.com" &&
+        !afterGmail.visible &&
+        mailNav.join() === "mailto:faizandevx@gmail.com" &&
+        !afterMailto.visible &&
+        !afterOutside.visible &&
+        afterOutside.expanded === "false",
+      JSON.stringify({ gmailUrl, mailNav, afterGmail, afterMailto, afterOutside }),
     );
     await app.locator(emailCard).focus();
-    await app.keyboard.press("Tab");
-    const copyFocus = await app.evaluate(() => {
-      const e = document.activeElement;
-      const c = getComputedStyle(e);
-      return { cls: e.className, outline: `${c.outlineStyle} ${c.outlineWidth}` };
-    });
+    await app.keyboard.press("Enter");
+    await app.waitForTimeout(200);
+    const kOpen = await popover();
+    await app.keyboard.press("ArrowDown");
+    const kFirst = await popover();
+    await app.keyboard.press("ArrowUp");
+    const kLast = await popover();
     await app.keyboard.press("Enter");
     await app.waitForTimeout(300);
-    const copied = {
+    const kCopied = {
       clipboard: await app.evaluate(() => navigator.clipboard.readText()),
-      text: await app.locator(".method-copy-btn").innerText(),
-      live: await app.locator(".contact-method-email [aria-live=polite]").textContent(),
+      text: await app.locator(`${options} button`).innerText(),
+      live: await app.locator(`${options} [aria-live=polite]`).textContent(),
     };
+    const axe = await new AxeBuilder({ page: app })
+      .include(".contact-side")
+      .withTags(AXE_TAGS)
+      .analyze();
+    await app.keyboard.press("Escape");
+    await app.waitForTimeout(200);
+    const kEscape = await popover();
+    const ring = await app.evaluate(() => getComputedStyle(document.activeElement).outlineStyle);
+    await app.keyboard.press("Enter");
+    for (let i = 0; i < 4; i++) await app.keyboard.press("Tab");
+    const kPill = await popover();
+    await app.keyboard.press("Tab");
+    await app.waitForTimeout(200);
+    const kOut = await popover();
     check(
-      "'Copy email' is the next Tab stop after the card, with the orange outline on keyboard focus; Enter copies faizandevx@gmail.com, shows 'Copied' and announces it",
-      copyFocus.cls === "method-copy-btn" &&
-        copyFocus.outline.startsWith("solid 2px") &&
-        copied.clipboard === "faizandevx@gmail.com" &&
-        copied.text === "Copied" &&
-        copied.live === "Email address copied.",
-      JSON.stringify({ copyFocus, copied }),
+      "Email card keyboard: Enter opens, arrows move through the options, Enter copies (announced), Escape closes and returns focus (visible ring), Tab reaches 'Copy email' and leaving closes the list; no axe violations while open",
+      kOpen.expanded === "true" &&
+        kOpen.visible &&
+        kFirst.focus === "Compose in Gmail ↗ (opens in a new tab)" &&
+        kLast.focus === "Copy email address" &&
+        kCopied.clipboard === "faizandevx@gmail.com" &&
+        kCopied.text.startsWith("Email address copied") &&
+        kCopied.live === "Email address copied." &&
+        !kEscape.visible &&
+        kEscape.focus.startsWith("Email me") &&
+        ring === "solid" &&
+        kPill.focus === "Copy email" &&
+        kPill.visible &&
+        !kOut.visible &&
+        axe.violations.length === 0,
+      JSON.stringify({
+        kOpen,
+        kFirst,
+        kLast,
+        kCopied,
+        kEscape,
+        ring,
+        kPill,
+        kOut,
+        axe: axe.violations.map((v) => v.id),
+      }),
     );
+    await app.mouse.move(1, 1);
+    await app.waitForTimeout(400);
     const lift = () =>
       app.evaluate(
-        (sel) => ({
-          card: getComputedStyle(document.querySelector(sel)).transform,
-          button: getComputedStyle(document.querySelector(".method-copy-btn")).transform,
+        (c) => ({
+          card: getComputedStyle(document.querySelector(c)).transform,
+          pill: getComputedStyle(document.querySelector(".method-copy-btn")).transform,
         }),
         emailCard,
       );
-    await app.locator(emailCard).blur();
-    await app.mouse.move(1, 1);
-    await app.waitForTimeout(500);
     const rest = await lift();
     await app.hover(emailCard);
     await app.waitForTimeout(500);
     const overCard = await lift();
     await app.hover(".method-copy-btn");
     await app.waitForTimeout(500);
-    const overButton = await lift();
+    const overPill = await lift();
+    await app.click(".method-copy-btn");
+    await app.waitForTimeout(300);
+    const pill = {
+      clipboard: await app.evaluate(() => navigator.clipboard.readText()),
+      text: await app.locator(".method-copy-btn").innerText(),
+      opened: (await popover()).visible,
+    };
     check(
-      "Email card and 'Copy email' rest together and lift 2px together, whether the card or the button is hovered",
-      rest.card === "none" &&
-        rest.button === "none" &&
-        [overCard, overButton].every(
-          (l) => l.card === "matrix(1, 0, 0, 1, 0, -2)" && l.button === "matrix(1, 0, 0, 1, 0, -2)",
+      "'Copy email' pill still copies the address ('Copied') without opening the list; card and pill rest and lift 2px together",
+      pill.clipboard === "faizandevx@gmail.com" &&
+        pill.text === "Copied" &&
+        !pill.opened &&
+        rest.card === "none" &&
+        rest.pill === "none" &&
+        [overCard, overPill].every(
+          (l) => l.card === "matrix(1, 0, 0, 1, 0, -2)" && l.pill === "matrix(1, 0, 0, 1, 0, -2)",
         ),
-      JSON.stringify({ rest, overCard, overButton }),
+      JSON.stringify({ pill, rest, overCard, overPill }),
     );
     await closeAll(ref, app);
   },
